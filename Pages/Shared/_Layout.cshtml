@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - vault</title>
+    <link rel="stylesheet" href="https://unpkg.com/tailwindcss@@^2/dist/tailwind.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+</head>
+<body>
+    <header>
+        <nav class="bg-gray-800">
+            <div class="md:container max-w-7xl mx-auto">
+              <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0">
+                      <div class="text-white">vault</div>
+                  </div>
+                  <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="/Replays" class="bg-gray-900 text-white px-3 py-2 rounded-md text-sm font-medium">Replays</a>
+                        <a href="/Maps" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Map</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </nav>
+    </header>
+    <div class="md:container mx-auto">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+<script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
