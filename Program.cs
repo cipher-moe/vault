@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -28,7 +29,12 @@ namespace vault
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                    webBuilder.UseUrls("http://*:8080");
+                    var port = Environment.GetEnvironmentVariable("PORT");
+                    if (port != null)
+                    {
+                        var serverPort = int.Parse(port);
+                        webBuilder.UseUrls($"http://*.{serverPort}");
+                    }
                 });
     }
 }
