@@ -58,7 +58,8 @@ namespace vault.Pages
             {
                 Replays = service.Collection.FindSync(Builders<Replay>.Filter.Eq("beatmap_hash", hash))
                     .ToList().ToArray();
-                Beatmap = await APIClient.GetBeatmapByHashAsync(Replays[0].BeatmapHash);
+                if (Replays.Length != 0)
+                    Beatmap = await APIClient.GetBeatmapByHashAsync(Replays[0].BeatmapHash);
             }
             else
                 Replays = service.Collection.Find(FilterDefinition<Replay>.Empty)
