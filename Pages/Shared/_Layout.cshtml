@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using System.Globalization
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -11,19 +12,47 @@
     <header>
         <nav class="bg-gray-800">
             <div class="md:container max-w-7xl mx-auto">
-              <div class="flex items-center justify-between h-16">
-                <div class="flex items-center">
-                  <div class="flex-shrink-0">
-                      <div class="text-white">vault</div>
-                  </div>
-                  <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-4">
-                        <a href="/Replays" class="bg-gray-900 text-white px-3 py-2 rounded-md text-sm font-medium">Replays</a>
-                        <a href="/Maps" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Map</a>
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="text-white">vault</div>
+                        </div>
+                        <div class="hidden md:block">
+                            @{
+                                string chosenStyles = "bg-gray-900 text-white px-3 py-2 rounded-md text-sm font-medium";
+                                string otherStyles = "text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium";
+                                var routes = new[]
+                                {
+                                    ("/Replays", "Replays"),
+                                    ("/Maps", "Maps")
+                                };
+                            }
+                            <div class="ml-10 flex items-baseline space-x-4">
+                                @foreach (var (path, name) in routes)
+                                {
+                                    if (Context.Request.Path.StartsWithSegments(path, StringComparison.InvariantCultureIgnoreCase))
+                                    {
+                                        
+                                        <a href="@path" class="@chosenStyles">
+                                            @name
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a href="@path" class="@otherStyles">
+                                            @name
+                                        </a>
+                                    }
+                                }
+                            </div>
+                        </div>
                     </div>
-                  </div>
+                    <div class="flex items-center justify-self-end">
+                        <span class="text-white">
+                            Generated : @DateTime.Now.ToUniversalTime().ToString($"HH:mm:ss, dd/MM/yyyy UTC", CultureInfo.InvariantCulture)
+                        </span>
+                    </div>
                 </div>
-              </div>
             </div>
         </nav>
     </header>
@@ -34,6 +63,5 @@
     </div>
 <script src="~/js/site.js" asp-append-version="true"></script>
 
-    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
