@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using OsuSharp;
 using vault.Services;
 
 namespace vault
@@ -24,9 +26,18 @@ namespace vault
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var httpClient = new HttpClient();
             services.AddRazorPages();
             services.AddSession(session => session.IdleTimeout = TimeSpan.FromMinutes(30));
+            services.AddSingleton(httpClient);
+            services.AddSingleton(
+                new OsuClient(new OsuSharpConfiguration{
+                    ApiKey = Environment.GetEnvironmentVariable("OSU_API_KEY"),
+                    HttpClient = httpClient
+                })
+            );
             services.AddSingleton<ReplayDatabaseService>();
+            services.AddSingleton<BeatmapDataService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

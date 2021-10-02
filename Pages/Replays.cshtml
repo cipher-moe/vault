@@ -3,15 +3,13 @@
 @using osu.Game.Beatmaps.Legacy
 @using osu.Game.Scoring
 @using osu.Game.Scoring.Legacy
+@using OsuSharp
 @model ReplayModel
 @{
     var hasHash = !string.IsNullOrWhiteSpace(RouteData.Values["hash"]?.ToString());
-    var beatmap = Model.Beatmap;
-    var hasMap = beatmap != null;
     if (hasHash)
     {
         Array.Sort(Model.Replays, (replay1, replay2) => replay2.Score.CompareTo(replay1.Score));
-        ViewData["Title"] = $"Replays for {(hasMap ? $"{beatmap.Title} [{beatmap.Difficulty}]" : RouteData.Values["hash"])}";
     }
     else
     {
@@ -22,8 +20,12 @@
 <br />
 @if (hasHash)
 {
+    var beatmap = Model.Maps.TryGetValue(Model.Replays[0].BeatmapHash, out var map) ? map : null;
+    var hasMap = beatmap != null;
     if (hasMap)
     {
+        ViewData["Title"] = $"Replays for {(hasMap ? $"{beatmap.Title} [{beatmap.Difficulty}]" : RouteData.Values["hash"])}";
+        
         <style>
             html {
                 background-image: linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.9)), 
@@ -132,7 +134,19 @@ else
                     @if (!hasHash)
                     {
                         <td class="border border-green-200 p-2 w-1/12">
-                            <a href="/replays/@replay.BeatmapHash">Map</a>
+                            <a href="/replays/@replay.BeatmapHash">
+                                @{
+                                    var beatmap = Model.Maps.TryGetValue(replay.BeatmapHash, out var map) ? map : null;
+                                }
+                                @if (beatmap != null)
+                                {
+                                    <span>@beatmap.Title [@beatmap.Difficulty]</span>
+                                }
+                                else
+                                {
+                                    <span>Custom map</span>
+                                }
+                            </a>
                         </td>
                     }
                 </tr>

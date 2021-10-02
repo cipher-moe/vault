@@ -29,19 +29,16 @@ namespace vault.Pages
     public class ReplayModel : PageModel
     {
         private readonly ReplayDatabaseService service;
+        private BeatmapDataService beatmapDataService;
         public Replay[] Replays = Array.Empty<Replay>();
-        public Beatmap Beatmap;
+        public readonly Dictionary<string, Beatmap> Maps = new();
 
-        public ReplayModel(ReplayDatabaseService service)
+        public ReplayModel(ReplayDatabaseService service, BeatmapDataService beatmapDataService)
         {
             this.service = service;
+            this.beatmapDataService = beatmapDataService;
         }
-
-        public static OsuClient APIClient = new (new OsuSharpConfiguration
-        {
-            ApiKey = Environment.GetEnvironmentVariable("OSU_API_KEY")
-        });
-
+        
         public static readonly LegacyScoreDecoder ScoreDecoder = new ();
         public static readonly Ruleset[] Rulesets = { new OsuRuleset(), new TaikoRuleset(), new CatchRuleset(), new ManiaRuleset() };
         public static IEnumerable<Mod> ModsFromModbits(Ruleset ruleset, LegacyMods mods)
@@ -59,13 +56,17 @@ namespace vault.Pages
                 Replays = service.Collection.FindSync(Builders<Replay>.Filter.Eq("beatmap_hash", hash))
                     .ToList().ToArray();
                 if (Replays.Length != 0)
-                    Beatmap = await APIClient.GetBeatmapByHashAsync(Replays[0].BeatmapHash);
+                    Maps[Replays[0].BeatmapHash] = await beatmapDataService.GetByHash(Replays[0].BeatmapHash);
             }
             else
+            {
                 Replays = service.Collection.Find(FilterDefinition<Replay>.Empty)
                     .Limit(50)
                     .SortByDescending(replay => replay.Timestamp)
                     .ToList().ToArray();
+                foreach (var replay in Replays)
+                    Maps[replay.BeatmapHash] = await beatmapDataService.GetByHash(replay.BeatmapHash);
+            }
         }
     }
 }
