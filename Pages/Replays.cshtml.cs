@@ -41,6 +41,8 @@ namespace vault.Pages
 
         [FromQuery(Name = "page")]
         public int PageIndex { get; set; } = 1;
+        
+        public string Hash { get; set; }
 
         public ReplayModel(ReplayDatabaseService service, BeatmapDataService beatmapDataService)
         {

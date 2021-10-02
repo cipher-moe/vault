@@ -1,0 +1,102 @@
+@using System.Globalization
+@using osu.Game.Beatmaps.Legacy
+@model ReplayModel
+<div class="text-3xl">
+    @ViewData["Title"]
+    <br/>
+    <span class="text-sm">out of (estimated) <b>@Model.TotalCount</b> replays</span>
+</div>
+
+@{
+    var canGoBack = Model.PageIndex > 1;
+}
+
+<div class="grid place-items-end">
+    <div>
+        @if (canGoBack)
+        {
+            <a href="?page=@(Model.PageIndex - 1)">
+                <button class="h-9 px-6 m-1 bg-blue-700 hover:bg-blue-600 text-white transition-colors duration-150 rounded-lg">
+                    &lt; Page @(Model.PageIndex - 1)
+                </button>
+            </a>
+        }
+        <span>Page <b>@Model.PageIndex</b></span>
+        <a href="?page=@(Model.PageIndex + 1)">
+            <button class="h-9 px-6 m-1 bg-blue-700 hover:bg-blue-600 text-white transition-colors duration-150 rounded-lg ">
+                Page @(Model.PageIndex + 1) &gt;
+            </button>
+        </a>
+    </div>
+</div>
+
+<div class="md:container mx-auto flex justify-center items-center w-full">
+    <table class="table-fixed w-full border-collapse">
+        <thead>
+        <tr>
+            <th class="border border-green-900 w-1/6">Timestamp (in UTC)</th>
+            <th class="border border-green-900 w-1/12">Score</th>
+            <th class="border border-green-900 w-1/6">Username</th>
+            <th class="border border-green-900 w-1/12">Max combo</th>
+            <th class="border border-green-900 w-1/12">Accuracy</th>
+            <th class="border border-green-900 w-1/12">Mods</th>
+            <th class="border border-green-900 w-1/12">300s</th>
+            <th class="border border-green-900 w-1/12">100s</th>
+            <th class="border border-green-900 w-1/12">50s</th>
+            <th class="border border-green-900 w-1/12">Misses</th>
+            <th class="border border-green-900 w-1/4">Map</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var replay in Model.Replays)
+        {
+            <tr class="@(replay.PerfectCombo ? "bg-green-100" : "") border-green-200 text-center">
+                <td class="border border-green-200 p-1.5 w-1/6">
+                    @DateTime.Parse(replay.Timestamp).ToUniversalTime().ToString($"HH:mm:ss, dd/MM/yyyy", CultureInfo.InvariantCulture)
+                </td>
+                <td class="border border-green-200 p-2">
+                    @replay.Score.ToString("n0", CultureInfo.InvariantCulture)
+                </td>
+                <td class="border border-green-200 p-2">
+                    @replay.PlayerName
+                </td>
+                <td class="border border-green-200 p-2">
+                    @replay.MaxCombo
+                </td>
+                <td class="border border-green-200 p-2">
+                    @replay.Accuracy%
+                </td>
+                <td class="border border-green-200 p-2">
+                    @{
+                        var mods = ReplayModel.ModsFromModbits(ReplayModel.Rulesets[replay.Mode], (LegacyMods)replay.Mods);
+                        var acronyms = string.Join(", ", mods.Select(mod => mod.Acronym));
+                    }
+                    @(string.IsNullOrWhiteSpace(acronyms) ? "None" : acronyms)
+                </td>
+                <td class="border border-green-200 p-0 w-1/12">@replay.Count300</td>
+                <td class="border border-green-200 p-0 w-1/12">@replay.Count100</td>
+                <td class="border border-green-200 p-0 w-1/12">@replay.Count50</td>
+                <td class="border border-green-200 p-0 w-1/12">@replay.CountMiss</td>
+                @{
+                    var beatmap = Model.Maps.TryGetValue(replay.BeatmapHash, out var map) ? map : null;
+                    <td class="border border-green-200 p-2 w-1/4 @(beatmap == null ? "bg-yellow-200" : "")">
+                        <a href="/replays/@replay.BeatmapHash"
+                           class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600">
+                            @if (beatmap != null)
+                            {
+                                <span>
+                                    @beatmap.Title <b>[@beatmap.Difficulty]</b>
+                                </span>
+                            }
+                            else
+                            {
+                                <span>Custom map</span>
+                            }
+                        </a>
+                    </td>
+                }
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
