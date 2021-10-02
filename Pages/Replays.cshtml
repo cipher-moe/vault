@@ -85,14 +85,17 @@ else
 
     <div class="grid place-items-end">
         <div>
-            <a href="?page=@(Model.PageIndex - 1)" style="pointer-events: @(canGoBack ? "auto" : "none")">
-                <button class="h-9 px-6 m-1 @(canGoBack ? "bg-blue-700 hover:bg-blue-600 text-white" : "bg-blue-200") transition-colors duration-150 rounded-lg">
-                    &lt; Page @(Model.PageIndex - 1)
-                </button>
-            </a>
+            @if (canGoBack)
+            {
+                <a href="?page=@(Model.PageIndex - 1)">
+                    <button class="h-9 px-6 m-1 bg-blue-700 hover:bg-blue-600 text-white transition-colors duration-150 rounded-lg">
+                        &lt; Page @(Model.PageIndex - 1)
+                    </button>
+                </a>
+            }
             <span>Page <b>@Model.PageIndex</b></span>
             <a href="?page=@(Model.PageIndex + 1)">
-                <button class="h-9 px-6 m-1 transition-colors duration-150 rounded-lg bg-blue-700 hover:bg-blue-600 text-white">
+                <button class="h-9 px-6 m-1 bg-blue-700 hover:bg-blue-600 text-white transition-colors duration-150 rounded-lg ">
                     Page @(Model.PageIndex + 1) &gt; 
                 </button>
             </a>
