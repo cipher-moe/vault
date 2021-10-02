@@ -155,7 +155,7 @@ else
                     @if (!hasHash)
                     {
                         var beatmap = Model.Maps.TryGetValue(replay.BeatmapHash, out var map) ? map : null;
-                        <td class="border border-green-200 p-2 w-1/4 @(beatmap == null ? "bg-red-300" : "")">
+                        <td class="border border-green-200 p-2 w-1/4 @(beatmap == null ? "bg-yellow-200" : "")">
                             <a href="/replays/@replay.BeatmapHash"
                                class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600">
                                 @if (beatmap != null)
