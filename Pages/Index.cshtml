@@ -1,10 +1,15 @@
 ﻿@page
+@using System.Globalization
 @model IndexModel
 @{
     ViewData["Title"] = "Main page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="md:container mx-auto flex w-full">
+    <div>
+        <b>@Model.TotalReplayCount</b> replays available, from
+                @Model.FirstReplay.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)
+                to 
+                @Model.LastReplay.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)
+    </div>
 </div>
