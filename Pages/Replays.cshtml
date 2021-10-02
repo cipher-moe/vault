@@ -68,22 +68,22 @@ else
 <div class="md:container mx-auto flex justify-center items-center w-full">
     @if (Model.Replays.Length != 0)
     {
-        <table class="table-auto w-full border-collapse">
+        <table class="table-fixed w-full border-collapse">
             <thead>
             <tr>
-                <th class="border border-green-900">Timestamp (in UTC)</th>
-                <th class="border border-green-900">Score</th>
-                <th class="border border-green-900">Username</th>
-                <th class="border border-green-900">Max combo</th>
-                <th class="border border-green-900">Accuracy</th>
-                <th class="border border-green-900">Mods</th>
+                <th class="border border-green-900 w-1/6">Timestamp (in UTC)</th>
+                <th class="border border-green-900 w-1/12">Score</th>
+                <th class="border border-green-900 w-1/6">Username</th>
+                <th class="border border-green-900 w-1/12">Max combo</th>
+                <th class="border border-green-900 w-1/12">Accuracy</th>
+                <th class="border border-green-900 w-1/12">Mods</th>
                 <th class="border border-green-900 w-1/12">300s</th>
                 <th class="border border-green-900 w-1/12">100s</th>
                 <th class="border border-green-900 w-1/12">50s</th>
                 <th class="border border-green-900 w-1/12">Misses</th>
                 @if (!hasHash)
                 {
-                    <th class="border border-green-900 w-1/12">Map</th>
+                    <th class="border border-green-900 w-1/4">Map</th>
                 }
             </tr>
             </thead>
@@ -91,7 +91,7 @@ else
             @foreach (var replay in Model.Replays)
             {
                 <tr class="@(replay.PerfectCombo ? "bg-green-100" : "") border-green-200 text-center">
-                    <td class="border border-green-200 p-2 w-1/6">
+                    <td class="border border-green-200 p-1.5 w-1/6">
                         @DateTime.Parse(replay.Timestamp).ToUniversalTime().ToString($"HH:mm:ss, dd/MM/yyyy", CultureInfo.InvariantCulture)
                     </td>
                     <td class="border border-green-200 p-2">
@@ -127,17 +127,16 @@ else
                         }
                         @(string.IsNullOrWhiteSpace(acronyms) ? "None" : acronyms)
                     </td>
-                    <td class="border border-green-200 p-2 w-1/12">@replay.Count300</td>
-                    <td class="border border-green-200 p-2 w-1/12">@replay.Count100</td>
-                    <td class="border border-green-200 p-2 w-1/12">@replay.Count50</td>
-                    <td class="border border-green-200 p-2 w-1/12">@replay.CountMiss</td>
+                    <td class="border border-green-200 p-0 w-1/12">@replay.Count300</td>
+                    <td class="border border-green-200 p-0 w-1/12">@replay.Count100</td>
+                    <td class="border border-green-200 p-0 w-1/12">@replay.Count50</td>
+                    <td class="border border-green-200 p-0 w-1/12">@replay.CountMiss</td>
                     @if (!hasHash)
                     {
-                        <td class="border border-green-200 p-2 w-1/12">
-                            <a href="/replays/@replay.BeatmapHash">
-                                @{
-                                    var beatmap = Model.Maps.TryGetValue(replay.BeatmapHash, out var map) ? map : null;
-                                }
+                        var beatmap = Model.Maps.TryGetValue(replay.BeatmapHash, out var map) ? map : null;
+                        <td class="border border-green-200 p-2 w-1/4 @(beatmap == null ? "bg-red-300" : "")">
+                            <a href="/replays/@replay.BeatmapHash" 
+                                class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600">
                                 @if (beatmap != null)
                                 {
                                     <span>@beatmap.Title [@beatmap.Difficulty]</span>
