@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using MongoDB.Driver;
 using osu.Game.Beatmaps;
@@ -30,8 +31,14 @@ namespace vault.Pages
     {
         private readonly ReplayDatabaseService service;
         private BeatmapDataService beatmapDataService;
+
+        public long TotalCount = 0;
+        public const int PageCount = 50;
         public Replay[] Replays = Array.Empty<Replay>();
         public readonly Dictionary<string, Beatmap> Maps = new();
+
+        [FromQuery(Name = "page")]
+        public int PageIndex { get; set; } = 1;
 
         public ReplayModel(ReplayDatabaseService service, BeatmapDataService beatmapDataService)
         {
@@ -50,6 +57,7 @@ namespace vault.Pages
         
         public async Task OnGetAsync()
         {
+            TotalCount = await service.Collection.EstimatedDocumentCountAsync();
             var hash = RouteData.Values["hash"]?.ToString();
             if (!string.IsNullOrWhiteSpace(hash))
             {
@@ -61,8 +69,9 @@ namespace vault.Pages
             else
             {
                 Replays = service.Collection.Find(FilterDefinition<Replay>.Empty)
-                    .Limit(50)
                     .SortByDescending(replay => replay.Timestamp)
+                    .Skip((PageIndex - 1) * PageCount)
+                    .Limit(PageCount)
                     .ToList().ToArray();
                 foreach (var replay in Replays)
                     Maps[replay.BeatmapHash] = await beatmapDataService.GetByHash(replay.BeatmapHash);

@@ -3,7 +3,6 @@
 @using osu.Game.Beatmaps.Legacy
 @using osu.Game.Scoring
 @using osu.Game.Scoring.Legacy
-@using OsuSharp
 @model ReplayModel
 @{
     var hasHash = !string.IsNullOrWhiteSpace(RouteData.Values["hash"]?.ToString());
@@ -13,8 +12,8 @@
     }
     else
     {
-        Array.Sort(Model.Replays, (replay1, replay2) => string.Compare(replay2.Timestamp, replay1.Timestamp, StringComparison.Ordinal));
-        ViewData["Title"] = $"Most {Model.Replays.Length} recent replays";
+        // already sorted in the OnGetAsync handler
+        ViewData["Title"] = $"Recent replays ({ReplayModel.PageCount * (Model.PageIndex - 1) + 1} - {Model.PageIndex * ReplayModel.PageCount})";
     }
 }
 <br />
@@ -38,6 +37,8 @@
         <div class="text-3xl">
             @Model.Replays.Length replay@(Model.Replays.Length > 1 ? "s" : "") for
             <a class="underline" href="https://osu.ppy.sh/b/@beatmap.BeatmapId">@beatmap.Title [@beatmap.Difficulty]</a>
+            <br />
+            <span class="text-sm">out of (estimated) <b>@Model.TotalCount</b> replays</span>
         </div>
         <br />
         <div class="py-1">
@@ -62,7 +63,11 @@
 }
 else
 {
-    <div class="text-3xl">@ViewData["Title"]</div>
+    <div class="text-3xl">
+        @ViewData["Title"]
+        <br />
+        <span class="text-sm">out of (estimated) <b>@Model.TotalCount</b> replays</span>
+    </div>
 }
 <br />
 <div class="md:container mx-auto flex justify-center items-center w-full">
@@ -139,7 +144,7 @@ else
                                 class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600">
                                 @if (beatmap != null)
                                 {
-                                    <span>@beatmap.Title [@beatmap.Difficulty]</span>
+                                    <span>@beatmap.Title <b>[@beatmap.Difficulty]</b></span>
                                 }
                                 else
                                 {
