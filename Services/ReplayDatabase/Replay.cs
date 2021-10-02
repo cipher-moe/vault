@@ -23,5 +23,6 @@ namespace vault.Services.ReplayDatabase
         [BsonElement("mods")] public long Mods;
         [BsonElement("timestamp")] public string Timestamp = "";
         [BsonElement("sha256")] public string Sha256 = "";
+        public string Accuracy = "";
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -13,6 +14,7 @@ using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Taiko;
 using osu.Game.Scoring;
+using osu.Game.Scoring.Legacy;
 using OsuSharp;
 using vault.Services;
 using Beatmap = OsuSharp.Beatmap;
@@ -72,9 +74,26 @@ namespace vault.Pages
                     .SortByDescending(replay => replay.Timestamp)
                     .Skip((PageIndex - 1) * PageCount)
                     .Limit(PageCount)
-                    .ToList().ToArray();
-                foreach (var replay in Replays)
-                    Maps[replay.BeatmapHash] = await beatmapDataService.GetByHash(replay.BeatmapHash);
+                    .ToList()
+                    .ToArray();
+            }
+
+            foreach (var replay in Replays)
+            {
+                Maps[replay.BeatmapHash] = await beatmapDataService.GetByHash(replay.BeatmapHash);
+                var score = new ScoreInfo
+                {
+                    Ruleset = Rulesets[replay.Mode].RulesetInfo,
+                    RulesetID = replay.Mode,
+                };
+                score.SetCount50(replay.Count50);
+                score.SetCount100(replay.Count100);
+                score.SetCount300(replay.Count300);
+                score.SetCountGeki(replay.CountGeki);
+                score.SetCountKatu(replay.CountKatsu);
+                score.SetCountMiss(replay.CountMiss);
+                ScoreDecoder.CalculateAccuracy(score);
+                replay.Accuracy = (score.Accuracy * 100).ToString("F3");
             }
         }
     }

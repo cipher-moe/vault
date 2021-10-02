@@ -1,8 +1,6 @@
 @page "{hash?}"
 @using System.Globalization
 @using osu.Game.Beatmaps.Legacy
-@using osu.Game.Scoring
-@using osu.Game.Scoring.Legacy
 @model ReplayModel
 @{
     var hasHash = !string.IsNullOrWhiteSpace(RouteData.Values["hash"]?.ToString());
@@ -16,15 +14,14 @@
         ViewData["Title"] = $"Recent replays ({ReplayModel.PageCount * (Model.PageIndex - 1) + 1} - {Model.PageIndex * ReplayModel.PageCount})";
     }
 }
-<br />
+<br/>
 @if (hasHash)
 {
     var beatmap = Model.Maps.TryGetValue(Model.Replays[0].BeatmapHash, out var map) ? map : null;
     var hasMap = beatmap != null;
+    ViewData["Title"] = $"Replays for {(hasMap ? $"{beatmap.Title} [{beatmap.Difficulty}]" : RouteData.Values["hash"])}";
     if (hasMap)
     {
-        ViewData["Title"] = $"Replays for {(hasMap ? $"{beatmap.Title} [{beatmap.Difficulty}]" : RouteData.Values["hash"])}";
-        
         <style>
             html {
                 background-image: linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.9)), 
@@ -37,39 +34,72 @@
         <div class="text-3xl">
             @Model.Replays.Length replay@(Model.Replays.Length > 1 ? "s" : "") for
             <a class="underline" href="https://osu.ppy.sh/b/@beatmap.BeatmapId">@beatmap.Title [@beatmap.Difficulty]</a>
-            <br />
+            <br/>
             <span class="text-sm">out of (estimated) <b>@Model.TotalCount</b> replays</span>
         </div>
-        <br />
+        <br/>
         <div class="py-1">
             <span class="tracking-wider border-red-400 border-2 px-4 py-1 text-md rounded mr-2 font-semibold">
-                <b>@($"{beatmap.StarRating:F2}")</b> ★</span>
+                <b>@($"{beatmap.StarRating:F2}")</b> ★
+            </span>
             <span class="tracking-wider border-red-400 border-2 px-4 py-1 text-md rounded mr-2 font-semibold">
-                CS <b>@beatmap.CircleSize</b></span>
+                CS <b>@beatmap.CircleSize</b>
+            </span>
             <span class="tracking-wider border-blue-400 border-2 px-4 py-1 text-md rounded mr-2 font-semibold">
-                AR <b>@beatmap.ApproachRate</b></span>
+                AR <b>@beatmap.ApproachRate</b>
+            </span>
             <span class="tracking-wider border-green-400 border-2 px-4 py-1 text-md rounded mr-2 font-semibold">
-                OD <b>@beatmap.OverallDifficulty</b></span>
+                OD <b>@beatmap.OverallDifficulty</b>
+            </span>
             <span class="tracking-wider border-yellow-500 border-2 px-4 py-1 text-md rounded mr-2 font-semibold">
-                HP <b>@beatmap.HpDrain</b></span>
+                HP <b>@beatmap.HpDrain</b>
+            </span>
             <span class="tracking-wider border-indigo-400 border-2 px-4 py-1 text-md rounded mr-2 font-semibold">
-                <i class="far fa-clock"></i> <b>@beatmap.TotalLength.ToString(@"mm\:ss")</b></span>
+                <i class="far fa-clock"></i> <b>@beatmap.TotalLength.ToString(@"mm\:ss")</b>
+            </span>
             <span class="tracking-wider border-gray-500 border-2 px-4 py-1 text-md rounded mr-2 font-semibold">
-                BPM <b>@beatmap.Bpm</b></span>
+                BPM <b>@beatmap.Bpm</b>
+            </span>
             <span class="tracking-wider border-purple-400 border-2 px-4 py-1 text-md rounded mr-2 font-semibold">
-                Max combo : <b>@beatmap.MaxCombo</b><span class="font-normal">x</span></span>
+                Max combo : <b>@beatmap.MaxCombo</b><span class="font-normal">x</span>
+            </span>
         </div>
     }
+    else
+    {
+        <div class="text-3xl">
+            @ViewData["Title"]
+        </div>
+    }
+    <br />
 }
 else
 {
     <div class="text-3xl">
         @ViewData["Title"]
-        <br />
+        <br/>
         <span class="text-sm">out of (estimated) <b>@Model.TotalCount</b> replays</span>
     </div>
+
+    var canGoBack = Model.PageIndex > 1;
+
+    <div class="grid place-items-end">
+        <div>
+            <a href="?page=@(Model.PageIndex - 1)" style="pointer-events: @(canGoBack ? "auto" : "none")">
+                <button class="h-9 px-6 m-1 @(canGoBack ? "bg-blue-700 hover:bg-blue-600 text-white" : "bg-blue-200") transition-colors duration-150 rounded-lg">
+                    &lt; Page @(Model.PageIndex - 1)
+                </button>
+            </a>
+            <span>Page <b>@Model.PageIndex</b></span>
+            <a href="?page=@(Model.PageIndex + 1)">
+                <button class="h-9 px-6 m-1 transition-colors duration-150 rounded-lg bg-blue-700 hover:bg-blue-600 text-white">
+                    Page @(Model.PageIndex + 1) &gt; 
+                </button>
+            </a>
+        </div>
+    </div>
 }
-<br />
+
 <div class="md:container mx-auto flex justify-center items-center w-full">
     @if (Model.Replays.Length != 0)
     {
@@ -108,26 +138,12 @@ else
                     <td class="border border-green-200 p-2">
                         @replay.MaxCombo
                     </td>
-                    @{
-                        var score = new ScoreInfo
-                        {
-                            Ruleset = ReplayModel.Rulesets[replay.Mode].RulesetInfo,
-                            RulesetID = replay.Mode,
-                        };
-                        score.SetCount50(replay.Count50);
-                        score.SetCount100(replay.Count100);
-                        score.SetCount300(replay.Count300);
-                        score.SetCountGeki(replay.CountGeki);
-                        score.SetCountKatu(replay.CountKatsu);
-                        score.SetCountMiss(replay.CountMiss);
-                        ReplayModel.ScoreDecoder.CalculateAccuracy(score);
-                    }
                     <td class="border border-green-200 p-2">
-                        @($"{score.Accuracy * 100:F3}")%
+                        @replay.Accuracy%
                     </td>
                     <td class="border border-green-200 p-2">
                         @{
-                            var mods = ReplayModel.ModsFromModbits(ReplayModel.Rulesets[replay.Mode], (LegacyMods) replay.Mods);
+                            var mods = ReplayModel.ModsFromModbits(ReplayModel.Rulesets[replay.Mode], (LegacyMods)replay.Mods);
                             var acronyms = string.Join(", ", mods.Select(mod => mod.Acronym));
                         }
                         @(string.IsNullOrWhiteSpace(acronyms) ? "None" : acronyms)
@@ -140,11 +156,13 @@ else
                     {
                         var beatmap = Model.Maps.TryGetValue(replay.BeatmapHash, out var map) ? map : null;
                         <td class="border border-green-200 p-2 w-1/4 @(beatmap == null ? "bg-red-300" : "")">
-                            <a href="/replays/@replay.BeatmapHash" 
-                                class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600">
+                            <a href="/replays/@replay.BeatmapHash"
+                               class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600">
                                 @if (beatmap != null)
                                 {
-                                    <span>@beatmap.Title <b>[@beatmap.Difficulty]</b></span>
+                                    <span>
+                                        @beatmap.Title <b>[@beatmap.Difficulty]</b>
+                                    </span>
                                 }
                                 else
                                 {
