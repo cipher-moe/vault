@@ -1,0 +1,17 @@
+@page "/replays/map/"
+@model MapEntryModel
+
+@{
+    ViewData["Title"] = "Search beatmaps to view replay";
+}
+
+<div class="justify-center flex flex-col">
+    <h3 class="text-center">Enter a beatmap hash to jump to the relevant listing.</h3>
+    <br />
+    <form class="justify-center m-4 flex flex-row w-full" method="POST">
+        <input
+            name="beatmap"
+            class="text-center w-1/2 rounded-lg p-4 border-2 mr-0 text-black border-gray-300 focus:border-gray-400 bg-white"
+            placeholder="c2a034a5c6d3a7fec931e065f4b12a66"/>
+    </form>
+</div>
