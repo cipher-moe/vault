@@ -2,10 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="BitFaster.Caching" Version="1.0.4" />
+    <PackageReference Include="ChunkExtensionMethod" Version="1.0.2" />
     <PackageReference Include="dotenv.net" Version="3.0.0" />
     <PackageReference Include="MongoDB.Driver" Version="2.12.4" />
     <PackageReference Include="OsuSharp" Version="5.4.4" />
@@ -45,6 +47,10 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\lib" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Pages\Replays\_ReplayMapList.cshtml.cs" />
   </ItemGroup>
 
 </Project>

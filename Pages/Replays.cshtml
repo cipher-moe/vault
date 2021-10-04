@@ -1,26 +1,9 @@
 @page "{hash?}"
-@model ReplayModel
-@{
-    var hasHash = !string.IsNullOrWhiteSpace(RouteData.Values["hash"]?.ToString());
-    if (hasHash)
-    {
-        var beatmap = Model.Maps.TryGetValue(Model.Replays[0].BeatmapHash, out var map) ? map : null;
-        var hasMap = beatmap != null;
-        Model.Hash = RouteData.Values["hash"].ToString();
-        ViewData["Title"] = $"Replays for {(hasMap ? $"{beatmap.Title} [{beatmap.Difficulty}]" : Model.Hash)}";
-        Array.Sort(Model.Replays, (replay1, replay2) => replay2.Score.CompareTo(replay1.Score));
-    }
-    else
-    {
-        ViewData["Title"] = $"Recent replays ({ReplayModel.PageCount * (Model.PageIndex - 1) + 1} - {Model.PageIndex * ReplayModel.PageCount})";
-    }
-}
-<br/>
-@if (hasHash)
+@functions
 {
-    <partial name="Replays/_ReplayMapList"/>
-}
-else
-{
-    <partial name="Replays/_ReplayRecentList"/>
+    public IActionResult OnGet()
+    {
+        var hash = RouteData.Values["hash"]?.ToString();
+        return Redirect(hash == null ? "/replays/list" : $"/replays/map/{hash}");
+    }
 }

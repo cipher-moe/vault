@@ -1,10 +1,12 @@
+@page "/replays/map/{hash}"
 @using System.Globalization
 @using osu.Game.Beatmaps.Legacy
-@model ReplayModel
+@model ReplayMapModel
 
 @{
-    var beatmap = Model.Maps.TryGetValue(Model.Replays[0].BeatmapHash, out var map) ? map : null;
+    var beatmap = Model.Map;
     var hasMap = beatmap != null;
+    ViewData["Title"] = $"Replays for {(hasMap ? $"{beatmap.Title} [{beatmap.Difficulty}]" : Model.Hash)}";
 }
 @if (hasMap)
 {
@@ -97,7 +99,7 @@ else
                     </td>
                     <td class="border border-green-200 p-2">
                         @{
-                            var mods = ReplayModel.ModsFromModbits(ReplayModel.Rulesets[replay.Mode], (LegacyMods)replay.Mods);
+                            var mods = ReplayListModel.ModsFromModbits(ReplayListModel.Rulesets[replay.Mode], (LegacyMods)replay.Mods);
                             var acronyms = string.Join(", ", mods.Select(mod => mod.Acronym));
                         }
                         @(string.IsNullOrWhiteSpace(acronyms) ? "None" : acronyms)

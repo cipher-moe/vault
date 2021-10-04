@@ -1,6 +1,13 @@
+@page "/replays/list"
 @using System.Globalization
 @using osu.Game.Beatmaps.Legacy
-@model ReplayModel
+@model ReplayListModel
+
+@{
+    const int pageCount = ReplayListModel.PageCount;
+    ViewData["Title"] = $"Recent replays ({pageCount * (Model.PageIndex - 1) + 1} - {Model.PageIndex * pageCount})";
+}
+
 <div class="text-3xl">
     @ViewData["Title"]
     <br/>
@@ -72,7 +79,7 @@
                 @{
                     var beatmap = Model.Maps.TryGetValue(replay.BeatmapHash, out var map) ? map : null;
                     <td class="border border-green-200 p-2 w-1/4 @(beatmap == null ? "bg-yellow-200" : "")">
-                        <a href="/replays/@replay.BeatmapHash"
+                        <a href="/replays/map/@replay.BeatmapHash"
                            class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600">
                             @if (beatmap != null)
                             {
@@ -85,7 +92,7 @@
                                 <span>Custom map</span>
                             }
                             @{
-                                var mods = ReplayModel.ModsFromModbits(ReplayModel.Rulesets[replay.Mode], (LegacyMods)replay.Mods);
+                                var mods = ReplayListModel.ModsFromModbits(ReplayListModel.Rulesets[replay.Mode], (LegacyMods)replay.Mods);
                                 var acronyms = string.Join(", ", mods.Select(mod => mod.Acronym));
                             }
                             @(string.IsNullOrWhiteSpace(acronyms) ? "" : "+" + acronyms)

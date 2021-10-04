@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BAMCIS.ChunkExtensionMethod;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using MongoDB.Driver;
@@ -15,24 +16,23 @@ using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Taiko;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
-using OsuSharp;
 using vault.Services;
 using Beatmap = OsuSharp.Beatmap;
 using Replay = vault.Services.ReplayDatabase.Replay;
 
-namespace vault.Pages
+namespace vault.Pages.Replays
 {
     public class LegacyScoreDecoder : osu.Game.Scoring.Legacy.LegacyScoreDecoder
     {
         protected override WorkingBeatmap GetBeatmap(string md5Hash) => null;
-        protected override Ruleset GetRuleset(int rulesetId) => ReplayModel.Rulesets[rulesetId];
+        protected override Ruleset GetRuleset(int rulesetId) => ReplayListModel.Rulesets[rulesetId];
         public new void CalculateAccuracy(ScoreInfo score) => base.CalculateAccuracy(score);
     }
     
-    public class ReplayModel : PageModel
+    public class ReplayListModel : PageModel
     {
         private readonly ReplayDatabaseService service;
-        private BeatmapDataService beatmapDataService;
+        private readonly BeatmapDataService beatmapDataService;
 
         public long TotalCount = 0;
         public const int PageCount = 50;
@@ -41,10 +41,8 @@ namespace vault.Pages
 
         [FromQuery(Name = "page")]
         public int PageIndex { get; set; } = 1;
-        
-        public string Hash { get; set; }
 
-        public ReplayModel(ReplayDatabaseService service, BeatmapDataService beatmapDataService)
+        public ReplayListModel(ReplayDatabaseService service, BeatmapDataService beatmapDataService)
         {
             this.service = service;
             this.beatmapDataService = beatmapDataService;
@@ -62,27 +60,38 @@ namespace vault.Pages
         public async Task OnGetAsync()
         {
             TotalCount = await service.Collection.EstimatedDocumentCountAsync();
-            var hash = RouteData.Values["hash"]?.ToString();
-            if (!string.IsNullOrWhiteSpace(hash))
+            Replays = service.Collection.Find(FilterDefinition<Replay>.Empty)
+                .SortByDescending(replay => replay.Timestamp)
+                .Skip((PageIndex - 1) * PageCount)
+                .Limit(PageCount)
+                .ToList()
+                .ToArray();
+
+
+            var hashChunks = Replays
+                .Select(replay => replay.BeatmapHash)
+                .Distinct()
+                .Chunk(8);
+
+            // parallelize the beatmap fetching to a certain degree
+            foreach (var chunk in hashChunks)
             {
-                Replays = service.Collection.FindSync(Builders<Replay>.Filter.Eq("beatmap_hash", hash))
-                    .ToList().ToArray();
-                if (Replays.Length != 0)
-                    Maps[Replays[0].BeatmapHash] = await beatmapDataService.GetByHash(Replays[0].BeatmapHash);
-            }
-            else
-            {
-                Replays = service.Collection.Find(FilterDefinition<Replay>.Empty)
-                    .SortByDescending(replay => replay.Timestamp)
-                    .Skip((PageIndex - 1) * PageCount)
-                    .Limit(PageCount)
-                    .ToList()
-                    .ToArray();
+                var pairs = await Task.WhenAll(
+                    chunk
+                        .Select(async hash =>
+                        {
+                            var beatmap = await beatmapDataService.GetByHash(hash);
+                            return (hash, beatmap);
+                        }));
+
+                foreach (var (hash, beatmap) in pairs)
+                {
+                    if (beatmap != null) Maps[hash] = beatmap;
+                }
             }
 
             foreach (var replay in Replays)
             {
-                Maps[replay.BeatmapHash] = await beatmapDataService.GetByHash(replay.BeatmapHash);
                 var score = new ScoreInfo
                 {
                     Ruleset = Rulesets[replay.Mode].RulesetInfo,

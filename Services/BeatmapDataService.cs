@@ -14,7 +14,7 @@ namespace vault.Services
             this.client = client;
         }
 
-        public async Task<Beatmap> GetByHash(string hash)
+        public async Task<Beatmap?> GetByHash(string hash)
         {
             if (cache.TryGet(hash, out var @return)) return @return;
             var res = await client.GetBeatmapByHashAsync(hash);
