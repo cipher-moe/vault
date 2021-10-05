@@ -81,33 +81,33 @@ else
             <tbody>
             @foreach (var replay in Model.Replays)
             {
-                <tr class="@(replay.PerfectCombo ? "bg-green-100" : "") border-green-200 text-center">
-                    <td class="border border-green-200 p-1.5 w-1/6">
+                <tr class="@(replay.PerfectCombo ? "bg-green-100" : "") border-gray-300 text-center">
+                    <td class="border border-gray-300 p-1.5 w-1/6">
                         @DateTime.Parse(replay.Timestamp).ToUniversalTime().ToString($"HH:mm:ss, dd/MM/yyyy", CultureInfo.InvariantCulture)
                     </td>
-                    <td class="border border-green-200 p-2">
+                    <td class="border border-gray-300 p-2">
                         @replay.Score.ToString("n0", CultureInfo.InvariantCulture)
                     </td>
-                    <td class="border border-green-200 p-2">
+                    <td class="border border-gray-300 p-2">
                         @replay.PlayerName
                     </td>
-                    <td class="border border-green-200 p-2">
+                    <td class="border border-gray-300 p-2">
                         @replay.MaxCombo
                     </td>
-                    <td class="border border-green-200 p-2">
+                    <td class="border border-gray-300 p-2">
                         @replay.Accuracy%
                     </td>
-                    <td class="border border-green-200 p-2">
+                    <td class="border border-gray-300 p-2">
                         @{
                             var mods = ReplayListModel.ModsFromModbits(ReplayListModel.Rulesets[replay.Mode], (LegacyMods)replay.Mods);
                             var acronyms = string.Join(", ", mods.Select(mod => mod.Acronym));
                         }
                         @(string.IsNullOrWhiteSpace(acronyms) ? "None" : acronyms)
                     </td>
-                    <td class="border border-green-200 p-0 w-1/12">@replay.Count300</td>
-                    <td class="border border-green-200 p-0 w-1/12">@replay.Count100</td>
-                    <td class="border border-green-200 p-0 w-1/12">@replay.Count50</td>
-                    <td class="border border-green-200 p-0 w-1/12">@replay.CountMiss</td>
+                    <td class="border border-gray-300 p-0 w-1/12 bg-blue-100">@replay.Count300</td>
+                    <td class="border border-gray-300 p-0 w-1/12 bg-green-100">@replay.Count100</td>
+                    <td class="border border-gray-300 p-0 w-1/12 bg-yellow-100">@replay.Count50</td>
+                    <td class="border border-gray-300 p-0 w-1/12 bg-red-100">@replay.CountMiss</td>
                 </tr>
             }
             </tbody>
