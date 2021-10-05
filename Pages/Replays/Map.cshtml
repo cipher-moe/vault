@@ -17,8 +17,8 @@
 {
     <style>
             html {
-                background-image: linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.9)), 
-                    url("https://assets.ppy.sh/beatmaps/@beatmap!.BeatmapsetId/covers/cover.jpg");
+                background-image: linear-gradient(rgba(255,255,255,.8), rgba(255,255,255,.9)), 
+                    url("https://assets.ppy.sh/beatmaps/@beatmap!.BeatmapsetId/covers/cover@2x.jpg");
                 background-size: cover;
                 background-repeat: no-repeat;
                 background-attachment: fixed;
@@ -67,6 +67,8 @@ else
 <br/>
 <div class="text-xs">
     Rows wrapped in <span class="text-purple-400 underline">purple</span> borders are top scores for the respective mod combination.
+    <br />
+    Rows with <b>bold</b> text indicate full-combo replays.
 </div>
 <br/>
 <div class="md:container mx-auto flex justify-center items-center w-full">
@@ -92,7 +94,7 @@ else
             {
                 var isTopScore = Model.TopModScores[(LegacyMods)replay.Mods] == replay.Score;
                 
-                <tr class="@(replay.PerfectCombo ? "bg-green-100" : "") @(isTopScore ? "border-purple-400 border-2" : "border-gray-300") text-center">
+                <tr class="@(replay.PerfectCombo ? "font-bold" : "") @(isTopScore ? "border-purple-400 border-2" : "border-gray-300") text-center">
                     <td class="border border-gray-300 p-1.5 w-1/6">
                         @DateTime.Parse(replay.Timestamp).ToUniversalTime().ToString($"HH:mm:ss, dd/MM/yyyy", CultureInfo.InvariantCulture)
                     </td>
