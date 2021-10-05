@@ -1,5 +1,6 @@
 @page "/replays/map/{hash}"
 @using System.Globalization
+@using Humanizer
 @using osu.Game.Beatmaps.Legacy
 @model ReplayMapModel
 
@@ -7,13 +8,17 @@
     var beatmap = Model.Map;
     var hasMap = beatmap != null;
     ViewData["Title"] = $"Replays for {(hasMap ? $"{beatmap!.Title} [{beatmap.Difficulty}]" : Model.Hash)}";
+    ViewData["Description"] = $@"Found {Model.Replays.Length} " 
+                              + $"{(Model.Replays.Length > 1 ? "replay".Pluralize() : "replay")} with a maximum combo of" 
+                              + Model.Replays.Max(rp => rp.MaxCombo)
+                              + $"x and accuracy of {Model.Replays.Max(rp => double.Parse(rp.Accuracy)):0.##}%";
 }
 @if (hasMap)
 {
     <style>
             html {
                 background-image: linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.9)), 
-                    url("https://assets.ppy.sh/beatmaps/@beatmap.BeatmapsetId/covers/cover.jpg");
+                    url("https://assets.ppy.sh/beatmaps/@beatmap!.BeatmapsetId/covers/cover.jpg");
                 background-size: cover;
                 background-repeat: no-repeat;
                 background-attachment: fixed;
@@ -105,7 +110,7 @@ else
                     </td>
                     <td class="border border-gray-300 p-2">
                         @{
-                            var mods = ReplayListModel.ModsFromModbits(ReplayListModel.Rulesets[replay.Mode], (LegacyMods)replay.Mods);
+                            var mods = ReplayRecentModel.ModsFromModbits(ReplayRecentModel.Rulesets[replay.Mode], (LegacyMods)replay.Mods);
                             var acronyms = string.Join(", ", mods.Select(mod => mod.Acronym));
                             if ((replay.Mods & (1 << 29)) != 0)
                                 acronyms += (string.IsNullOrEmpty(acronyms) ? "" : ", ") + "V2";

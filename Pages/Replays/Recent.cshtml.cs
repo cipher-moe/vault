@@ -25,11 +25,11 @@ namespace vault.Pages.Replays
     public class LegacyScoreDecoder : osu.Game.Scoring.Legacy.LegacyScoreDecoder
     {
         protected override WorkingBeatmap GetBeatmap(string md5Hash) => null;
-        protected override Ruleset GetRuleset(int rulesetId) => ReplayListModel.Rulesets[rulesetId];
+        protected override Ruleset GetRuleset(int rulesetId) => ReplayRecentModel.Rulesets[rulesetId];
         public new void CalculateAccuracy(ScoreInfo score) => base.CalculateAccuracy(score);
     }
     
-    public class ReplayListModel : PageModel
+    public class ReplayRecentModel : PageModel
     {
         private readonly ReplayDatabaseService service;
         private readonly BeatmapDataService beatmapDataService;
@@ -42,7 +42,7 @@ namespace vault.Pages.Replays
         [FromQuery(Name = "page")]
         public int PageIndex { get; set; } = 1;
 
-        public ReplayListModel(ReplayDatabaseService service, BeatmapDataService beatmapDataService)
+        public ReplayRecentModel(ReplayDatabaseService service, BeatmapDataService beatmapDataService)
         {
             this.service = service;
             this.beatmapDataService = beatmapDataService;
@@ -104,7 +104,7 @@ namespace vault.Pages.Replays
                 score.SetCountKatu(replay.CountKatsu);
                 score.SetCountMiss(replay.CountMiss);
                 ScoreDecoder.CalculateAccuracy(score);
-                replay.Accuracy = (score.Accuracy * 100).ToString("F3");
+                replay.Accuracy = (score.Accuracy * 100).ToString("0.###");
             }
         }
     }

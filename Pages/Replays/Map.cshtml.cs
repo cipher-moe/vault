@@ -51,7 +51,7 @@ namespace vault.Pages.Replays
             {
                 var score = new ScoreInfo
                 {
-                    Ruleset = ReplayListModel.Rulesets[replay.Mode].RulesetInfo,
+                    Ruleset = ReplayRecentModel.Rulesets[replay.Mode].RulesetInfo,
                     RulesetID = replay.Mode,
                 };
                 score.SetCount50(replay.Count50);
@@ -60,8 +60,8 @@ namespace vault.Pages.Replays
                 score.SetCountGeki(replay.CountGeki);
                 score.SetCountKatu(replay.CountKatsu);
                 score.SetCountMiss(replay.CountMiss);
-                ReplayListModel.ScoreDecoder.CalculateAccuracy(score);
-                replay.Accuracy = (score.Accuracy * 100).ToString("F3");
+                ReplayRecentModel.ScoreDecoder.CalculateAccuracy(score);
+                replay.Accuracy = (score.Accuracy * 100).ToString("0.###");
 
                 var mod = (LegacyMods)replay.Mods;
                 TopModScores.TryGetValue(mod, out var topScore);
