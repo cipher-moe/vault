@@ -19,13 +19,17 @@ namespace vault
             ConventionRegistry.Register(
                 "IgnoreExtraElements",
                 new ConventionPack { new IgnoreExtraElementsConvention(true) },
-                type => true
+                _ => true
             );
             CreateHostBuilder(args).Build().Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .ConfigureLogging(logging =>
+                {
+                    logging.AddConsole();
+                })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MongoDB.Driver;
 using OsuSharp;
 using vault.Services;
 
@@ -27,8 +28,10 @@ namespace vault
         public void ConfigureServices(IServiceCollection services)
         {
             var httpClient = new HttpClient();
+            services.AddLogging();
             services.AddRazorPages();
             services.AddSession(session => session.IdleTimeout = TimeSpan.FromMinutes(30));
+            services.AddSingleton(new MongoClient(Environment.GetEnvironmentVariable("MONGODB_URI")));
             services.AddSingleton(httpClient);
             services.AddSingleton(
                 new OsuClient(new OsuSharpConfiguration{
@@ -36,8 +39,9 @@ namespace vault
                     HttpClient = httpClient
                 })
             );
-            services.AddSingleton<ReplayDatabaseService>();
             services.AddSingleton<BeatmapDataService>();
+            services.AddSingleton<ReplayDatabaseService>();
+            services.AddHostedService<RefreshMostPlayedMapsService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

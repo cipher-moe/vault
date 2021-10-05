@@ -5,13 +5,68 @@
     ViewData["Title"] = "Search beatmaps to view replay";
 }
 
-<div class="justify-center flex flex-col">
-    <h3 class="text-center">Enter a beatmap hash to jump to the relevant listing.</h3>
-    <br />
-    <form class="justify-center m-4 flex flex-row w-full" method="POST">
+<div class="md:container mx-auto flex flex-col justify-center items-center text-center w-full">
+    <h3>Enter a beatmap hash to jump to the relevant listing.</h3>
+    <br/>
+    <form class="justify-center my-4 flex flex-row w-full" method="POST">
         <input
             name="beatmap"
             class="text-center w-1/2 rounded-lg p-4 border-2 mr-0 text-black border-gray-300 focus:border-gray-400 bg-white"
-            placeholder="c2a034a5c6d3a7fec931e065f4b12a66"/>
+            placeholder="@MapEntryModel.DefaultBeatmap"/>
     </form>
+
+    <h3>Or take a look at the most played maps.</h3>
+    <br />
+    <table class="mt-4 table-fixed w-full border-collapse">
+        <thead>
+        <tr>
+            <th class="border border-green-900 w-1/2">Title</th>
+            <th class="border border-green-900 w-1/12">Star rating</th>
+            <th class="border border-green-900 w-1/12">CS</th>
+            <th class="border border-green-900 w-1/12">AR</th>
+            <th class="border border-green-900 w-1/12">OD</th>
+            <th class="border border-green-900 w-1/12">HP</th>
+            <th class="border border-green-900 w-1/12">Length</th>
+            <th class="border border-green-900 w-1/12">BPM</th>
+            <th class="border border-green-900 w-1/12">Max combo</th>
+            <th class="border border-green-900 w-1/12">Count</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var (hash, count) in Model.MostPlayedMaps)
+        {
+            var beatmap = Model.Maps.TryGetValue(hash, out var map) ? map : null;
+            
+            <tr>
+                @{
+                    <td class="border border-green-200 p-2 w-1/2 @(beatmap == null ? "bg-yellow-200" : "")">
+                        <a href="/replays/map/@hash"
+                           class="underline text-black hover:text-blue-800 visited:text-purple-600">
+                            @if (beatmap != null)
+                            {
+                                <span>
+                                    @beatmap.Title <b>[@beatmap.Difficulty]</b>
+                                </span>
+                            }
+                            else
+                            {
+                                <span>Custom map</span>
+                            }
+                            
+                        </a>
+                    </td>
+                }
+                <td class="border border-green-200 p-0 w-1/12">@($"{beatmap?.StarRating:F2}")</td>
+                <td class="border border-green-200 p-0 w-1/12">@(beatmap?.CircleSize)</td>
+                <td class="border border-green-200 p-0 w-1/12">@(beatmap?.ApproachRate)</td>
+                <td class="border border-green-200 p-0 w-1/12">@(beatmap?.OverallDifficulty)</td>
+                <td class="border border-green-200 p-0 w-1/12">@(beatmap?.HpDrain)</td>
+                <td class="border border-green-200 p-0 w-1/12">@(beatmap?.TotalLength.ToString(@"mm\:ss"))</td>
+                <td class="border border-green-200 p-0 w-1/12">@($"{beatmap?.Bpm:0.##}")</td>
+                <td class="border border-green-200 p-0 w-1/12">@(beatmap?.MaxCombo)</td>
+                <td class="border border-green-200 p-0 w-1/12 bg-green-100">@count</td>
+            </tr>
+        }
+        </tbody>
+    </table>
 </div>
