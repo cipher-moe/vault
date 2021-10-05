@@ -4,6 +4,6 @@
     public IActionResult OnGet()
     {
         var hash = RouteData.Values["hash"]?.ToString();
-        return Redirect(hash == null ? "/replays/list" : $"/replays/map/{hash}");
+        return Redirect(hash == null ? "/replays/recent" : $"/replays/map/{hash}");
     }
 }
