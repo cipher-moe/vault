@@ -107,6 +107,8 @@ else
                         @{
                             var mods = ReplayListModel.ModsFromModbits(ReplayListModel.Rulesets[replay.Mode], (LegacyMods)replay.Mods);
                             var acronyms = string.Join(", ", mods.Select(mod => mod.Acronym));
+                            if ((replay.Mods & (1 << 29)) != 0)
+                                acronyms += (string.IsNullOrEmpty(acronyms) ? "" : ", ") + "V2";
                         }
                         @(string.IsNullOrWhiteSpace(acronyms) ? "None" : acronyms)
                     </td>
