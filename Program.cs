@@ -37,7 +37,7 @@ namespace vault
                     if (port != null)
                     {
                         var serverPort = int.Parse(port);
-                        webBuilder.UseUrls($"http://*.{serverPort}");
+                        webBuilder.UseUrls($"http://*:{serverPort}");
                     }
                 });
     }
