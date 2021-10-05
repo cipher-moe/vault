@@ -28,6 +28,7 @@ namespace vault.Pages.Replays
         public long TotalCount;
         public string Hash { get; set; } = "";
         public Replay[] Replays = Array.Empty<Replay>();
+        public Dictionary<LegacyMods, long> TopModScores = new();
 
         public ReplayMapModel(ReplayDatabaseService service, BeatmapDataService beatmapDataService)
         {
@@ -61,6 +62,10 @@ namespace vault.Pages.Replays
                 score.SetCountMiss(replay.CountMiss);
                 ReplayListModel.ScoreDecoder.CalculateAccuracy(score);
                 replay.Accuracy = (score.Accuracy * 100).ToString("F3");
+
+                var mod = (LegacyMods)replay.Mods;
+                TopModScores.TryGetValue(mod, out var topScore);
+                if (topScore < replay.Score) TopModScores[mod] = replay.Score;
             }
         }
     }

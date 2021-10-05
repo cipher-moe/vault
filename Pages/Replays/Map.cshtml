@@ -6,7 +6,7 @@
 @{
     var beatmap = Model.Map;
     var hasMap = beatmap != null;
-    ViewData["Title"] = $"Replays for {(hasMap ? $"{beatmap.Title} [{beatmap.Difficulty}]" : Model.Hash)}";
+    ViewData["Title"] = $"Replays for {(hasMap ? $"{beatmap!.Title} [{beatmap.Difficulty}]" : Model.Hash)}";
 }
 @if (hasMap)
 {
@@ -60,6 +60,10 @@ else
     </div>
 }
 <br/>
+<div class="text-xs">
+    Rows wrapped in <span class="text-purple-400 underline">purple</span> borders are top scores for the respective mod combination.
+</div>
+<br/>
 <div class="md:container mx-auto flex justify-center items-center w-full">
     @if (Model.Replays.Length != 0)
     {
@@ -81,7 +85,9 @@ else
             <tbody>
             @foreach (var replay in Model.Replays)
             {
-                <tr class="@(replay.PerfectCombo ? "bg-green-100" : "") border-gray-300 text-center">
+                var isTopScore = Model.TopModScores[(LegacyMods)replay.Mods] == replay.Score;
+                
+                <tr class="@(replay.PerfectCombo ? "bg-green-100" : "") @(isTopScore ? "border-purple-400 border-2" : "border-gray-300") text-center">
                     <td class="border border-gray-300 p-1.5 w-1/6">
                         @DateTime.Parse(replay.Timestamp).ToUniversalTime().ToString($"HH:mm:ss, dd/MM/yyyy", CultureInfo.InvariantCulture)
                     </td>
