@@ -4,8 +4,10 @@ using System.Threading.Tasks;
 using BAMCIS.ChunkExtensionMethod;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using MongoDB.Driver;
 using OsuSharp;
 using vault.Services;
+using Replay = vault.Services.ReplayDatabase.Replay;
 
 namespace vault.Pages.Replays
 {
@@ -17,16 +19,19 @@ namespace vault.Pages.Replays
         public readonly List<(string, int)> MostPlayedMaps;
         public const string DefaultBeatmap = "c2a034a5c6d3a7fec931e065f4b12a66";
         public readonly Dictionary<string, Beatmap> Maps = new();
+        public bool InvalidBeatmap = false;
 
         private readonly BeatmapDataService beatmapDataService;
+        private readonly ReplayDatabaseService replayDatabaseService;
         
         public MapEntryModel(ReplayDatabaseService replayDatabaseService, BeatmapDataService beatmapDataService)
         {
             this.beatmapDataService = beatmapDataService;
+            this.replayDatabaseService = replayDatabaseService;
             MostPlayedMaps = replayDatabaseService.MostPlayedMaps;
         }
 
-        public async Task OnGetAsync()
+        private async Task EnsureMapDataAvailable()
         {
             var hashChunks = MostPlayedMaps
                 .Select(pair => pair.Item1)
@@ -49,8 +54,30 @@ namespace vault.Pages.Replays
             }
         }
         
-        public IActionResult OnPost()
+        public async Task OnGetAsync()
         {
+            await EnsureMapDataAvailable();
+        }
+        
+        public async Task<IActionResult> OnPostAsync()
+        {
+            Beatmap = Beatmap?.ToLowerInvariant();
+            if (Beatmap != null)
+            {
+                var replayCount = await replayDatabaseService.Collection
+                    .CountDocumentsAsync(
+                        Builders<Replay>.Filter.Eq("beatmap_hash", Beatmap),
+                        new CountOptions { Limit = 1 }
+                    );
+
+                if (replayCount == 0)
+                {
+                    InvalidBeatmap = true;
+                    await EnsureMapDataAvailable();
+                    return Page();
+                }
+            }
+            
             return Redirect($"/replays/map/{Beatmap ?? DefaultBeatmap}");
         }
     }

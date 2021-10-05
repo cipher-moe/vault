@@ -6,16 +6,30 @@
 }
 
 <div class="md:container mx-auto flex flex-col justify-center items-center text-center w-full">
-    <h3>Enter a beatmap hash to jump to the relevant listing.</h3>
+    <h3>
+        @if (Model.InvalidBeatmap)
+        {
+            @("Enter a ")
+            <b>valid</b>
+            @(" beatmap hash to jump to the relevant listing. ")
+            <br />
+            <b>@Model.Beatmap <span class="text-red-500 underline">wasn't</span></b>
+            @(@" valid - there wasn't any play associated with it.")
+        }
+        else
+        {
+            @("Enter a beatmap hash to jump to the relevant listing.")
+        }
+    </h3>
     <br/>
-    <form class="justify-center my-4 flex flex-row w-full" method="POST">
+    <form class="justify-center my-4 flex flex-row w-full" method="POST" autocomplete="off">
         <input
             name="beatmap"
             class="text-center w-1/2 rounded-lg p-4 border-2 mr-0 text-black border-gray-300 focus:border-gray-400 bg-white"
             placeholder="@MapEntryModel.DefaultBeatmap"/>
     </form>
     <br />
-    <h3>Or take a look at the most played maps.</h3>
+    <h3>Or take a look at the most played maps :</h3>
     <br />
     <table class="mt-4 table-fixed w-full border-collapse">
         <thead>
