@@ -76,18 +76,6 @@ else
     {
         <table class="table-fixed w-full border-collapse">
             <thead>
-            <tr class="text-center">
-                <td class="border border-green-900 w-1/6"></td>
-                <td class="border border-green-900 w-1/12">@Model.Replays.Max(rep => rep.Score).ToString("n0", CultureInfo.InvariantCulture)</td>
-                <td class="border border-green-900 w-1/6"></td>
-                <td class="border border-green-900 w-1/12">@Model.Replays.Max(rep => rep.MaxCombo)</td>
-                <td class="border border-green-900 w-1/12">@($"{Model.Replays.Max(rep => double.Parse(rep.Accuracy)):0.###}%")</td>
-                <td class="border border-green-900 w-1/12"></td>
-                <td class="border border-green-900 w-1/12"></td>
-                <td class="border border-green-900 w-1/12"></td>
-                <td class="border border-green-900 w-1/12"></td>
-                <td class="border border-green-900 w-1/12">@Model.Replays.Min(rep => rep.CountMiss)</td>
-            </tr>
             <tr>
                 <th class="border border-green-900 w-1/6">Timestamp (in UTC)</th>
                 <th class="border border-green-900 w-1/12">Score</th>
@@ -99,9 +87,37 @@ else
                 <th class="border border-green-900 w-1/12">100s</th>
                 <th class="border border-green-900 w-1/12">50s</th>
                 <th class="border border-green-900 w-1/12">Misses</th>
+                <th class="border border-green-900 w-1/12">Download</th>
             </tr>
             </thead>
             <tbody>
+            @if (Model.Replays.Length != 0)
+            {
+                <tr class="font-bold border-gray-300 text-center">
+                    <td class="border border-gray-300 p-1.5 w-1/6">
+                        Best result
+                    </td>
+                    <td class="border border-gray-300 p-2">
+                        @Model.Replays.Max(rep => rep.Score).ToString("n0", CultureInfo.InvariantCulture)
+                    </td>
+                    <td class="border border-gray-300 p-2"></td>
+                    <td class="border border-gray-300 p-2">
+                        @Model.Replays.Max(rep => rep.MaxCombo)
+                    </td>
+                    <td class="border border-gray-300 p-2">
+                        @($"{Model.Replays.Max(rep => double.Parse(rep.Accuracy)):0.###}%")
+                    </td>
+                    <td class="border border-gray-300 p-2">
+                    </td>
+                    <td class="border border-gray-300 p-0 w-1/12 bg-blue-100"></td>
+                    <td class="border border-gray-300 p-0 w-1/12 bg-green-100"></td>
+                    <td class="border border-gray-300 p-0 w-1/12 bg-yellow-100"></td>
+                    <td class="border border-gray-300 p-0 w-1/12 bg-red-100">
+                        @Model.Replays.Min(rep => rep.CountMiss)
+                    </td>
+                    <td class="border border-gray-300 p-2"></td>
+                </tr>
+            }
             @foreach (var replay in Model.Replays)
             {
                 var isTopScore = Model.TopModScores[(LegacyMods)replay.Mods] == replay.Score;
@@ -135,6 +151,14 @@ else
                     <td class="border border-gray-300 p-0 w-1/12 bg-green-100">@replay.Count100</td>
                     <td class="border border-gray-300 p-0 w-1/12 bg-yellow-100">@replay.Count50</td>
                     <td class="border border-gray-300 p-0 w-1/12 bg-red-100">@replay.CountMiss</td>
+                    <td class="border border-gray-300 p-2 w-1/12">
+                        <a href="https://poetry-rewind.cipher.moe/@Model.Hash/@replay.Sha256">
+                            <span class="underline" title="@replay.Sha256.ToLowerInvariant()">
+                                @replay.Sha256[..7].ToLowerInvariant()
+                            </span>
+                            <i class="fa fa-download" aria-hidden="true"></i>
+                        </a>
+                    </td>
                 </tr>
             }
             </tbody>
