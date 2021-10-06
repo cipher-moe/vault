@@ -8,8 +8,8 @@
     var beatmap = Model.Map;
     var hasMap = beatmap != null;
     ViewData["Title"] = $"Replays for {(hasMap ? $"{beatmap!.Title} [{beatmap.Difficulty}]" : Model.Hash)}";
-    ViewData["Description"] = $@"Found {Model.Replays.Length} " 
-                              + $"{(Model.Replays.Length > 1 ? "replay".Pluralize() : "replay")} with a maximum combo of" 
+    ViewData["Description"] = $@"Found {Model.Replays.Length} "
+                              + $"{(Model.Replays.Length > 1 ? "replay".Pluralize() : "replay")} with a maximum combo of"
                               + Model.Replays.Max(rp => rp.MaxCombo)
                               + $"x and accuracy of {Model.Replays.Max(rp => double.Parse(rp.Accuracy)):0.##}%";
 }
@@ -67,7 +67,7 @@ else
 <br/>
 <div class="text-xs">
     Rows wrapped in <span class="text-purple-400 underline">purple</span> borders are top scores for the respective mod combination.
-    <br />
+    <br/>
     Rows with <b>bold</b> text indicate full-combo replays.
 </div>
 <br/>
@@ -76,6 +76,18 @@ else
     {
         <table class="table-fixed w-full border-collapse">
             <thead>
+            <tr class="text-center">
+                <td class="border border-green-900 w-1/6"></td>
+                <td class="border border-green-900 w-1/12">@Model.Replays.Max(rep => rep.Score).ToString("n0", CultureInfo.InvariantCulture)</td>
+                <td class="border border-green-900 w-1/6"></td>
+                <td class="border border-green-900 w-1/12">@Model.Replays.Max(rep => rep.MaxCombo)</td>
+                <td class="border border-green-900 w-1/12">@($"{Model.Replays.Max(rep => double.Parse(rep.Accuracy)):0.###}%")</td>
+                <td class="border border-green-900 w-1/12"></td>
+                <td class="border border-green-900 w-1/12"></td>
+                <td class="border border-green-900 w-1/12"></td>
+                <td class="border border-green-900 w-1/12"></td>
+                <td class="border border-green-900 w-1/12">@Model.Replays.Min(rep => rep.CountMiss)</td>
+            </tr>
             <tr>
                 <th class="border border-green-900 w-1/6">Timestamp (in UTC)</th>
                 <th class="border border-green-900 w-1/12">Score</th>
@@ -93,7 +105,7 @@ else
             @foreach (var replay in Model.Replays)
             {
                 var isTopScore = Model.TopModScores[(LegacyMods)replay.Mods] == replay.Score;
-                
+
                 <tr class="@(replay.PerfectCombo ? "font-bold" : "") @(isTopScore ? "border-purple-400 border-2" : "border-gray-300") text-center">
                     <td class="border border-gray-300 p-1.5 w-1/6">
                         @replay.Timestamp.ToUniversalTime().ToString($"HH:mm:ss, dd/MM/yyyy", CultureInfo.InvariantCulture)
