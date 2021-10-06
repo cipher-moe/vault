@@ -1,2 +1,8 @@
-@page
-@model Maps
+@page ""
+@functions
+{
+    public IActionResult OnGet()
+    {
+        return Redirect("/Maps/MostPlayed");
+    }
+}

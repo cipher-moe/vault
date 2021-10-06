@@ -10,9 +10,9 @@ using OsuSharp;
 using vault.Services;
 using Replay = vault.Services.ReplayDatabase.Replay;
 
-namespace vault.Pages.Replays
+namespace vault.Pages.Maps
 {
-    public class MapEntryModel : PageModel
+    public class MostPlayedMapsModel : PageModel
     {
         [FromForm(Name = "beatmap")]
         public string? Beatmap { get; set; }
@@ -20,13 +20,13 @@ namespace vault.Pages.Replays
         public (List<(string, int)>, DateTime) MostPlayedMaps;
         public const string DefaultBeatmap = "c2a034a5c6d3a7fec931e065f4b12a66";
         public readonly Dictionary<string, Beatmap> Maps = new();
-        public bool InvalidBeatmap = false;
+        public bool InvalidBeatmap;
         public long TotalCount;
 
         private readonly BeatmapDataService beatmapDataService;
         private readonly ReplayDatabaseService replayDatabaseService;
         
-        public MapEntryModel(ReplayDatabaseService replayDatabaseService, BeatmapDataService beatmapDataService)
+        public MostPlayedMapsModel(ReplayDatabaseService replayDatabaseService, BeatmapDataService beatmapDataService)
         {
             this.beatmapDataService = beatmapDataService;
             this.replayDatabaseService = replayDatabaseService;

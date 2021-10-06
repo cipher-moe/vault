@@ -6,12 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using MongoDB.Driver;
 using osu.Game.Beatmaps.Legacy;
-using osu.Game.Rulesets;
-using osu.Game.Rulesets.Catch;
-using osu.Game.Rulesets.Mania;
-using osu.Game.Rulesets.Mods;
-using osu.Game.Rulesets.Osu;
-using osu.Game.Rulesets.Taiko;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
 using OsuSharp;
@@ -36,10 +30,16 @@ namespace vault.Pages.Replays
             this.beatmapDataService = beatmapDataService;
         }
 
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
-            TotalCount = await service.Collection.EstimatedDocumentCountAsync();
             Hash = RouteData.Values["hash"]?.ToString()!;
+
+            if (string.IsNullOrWhiteSpace(Hash))
+            {
+                return Redirect("/Maps/MostPlayed");
+            }
+            
+            TotalCount = await service.Collection.EstimatedDocumentCountAsync();
             Replays = service.Collection.FindSync(Builders<Replay>.Filter.Eq("beatmap_hash", Hash))
                 .ToList()
                 .OrderByDescending(replay => replay.Score)
@@ -67,6 +67,8 @@ namespace vault.Pages.Replays
                 TopModScores.TryGetValue(mod, out var topScore);
                 if (topScore < replay.Score) TopModScores[mod] = replay.Score;
             }
+
+            return Page();
         }
     }
 }

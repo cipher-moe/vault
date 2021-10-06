@@ -34,16 +34,17 @@
                                 var routes = new[]
                                 {
                                     ("/Replays/Recent", "Recent replays"),
-                                    ("/Replays/Map", "Most played maps"),
+                                    ("/Maps/MostPlayed", "Most played maps"),
                                     ("/Maps", "Maps")
                                 };
+                                var matched = false;
                             }
                             <div class="ml-10 flex items-baseline space-x-4">
                                 @foreach (var (path, name) in routes)
                                 {
-                                    if (Context.Request.Path.StartsWithSegments(path, StringComparison.InvariantCultureIgnoreCase))
+                                    if (Context.Request.Path.StartsWithSegments(path, StringComparison.InvariantCultureIgnoreCase) && !matched)
                                     {
-                                        
+                                        matched = true;
                                         <a href="@path" class="@chosenStyles">
                                             @name
                                         </a>

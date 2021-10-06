@@ -1,6 +1,6 @@
-@page "/replays/map/"
+@page "/maps/mostplayed"
 @using Humanizer
-@model MapEntryModel
+@model MostPlayedMapsModel
 
 @{
     ViewData["Title"] = "Most played maps";
@@ -8,11 +8,11 @@
 
 <div class="md:container mx-auto flex flex-col justify-center text-center w-full">
     <div class="flex flex-row justify-between">
-        <div class="text-3xl">
+        <div class="text-3xl text-left">
             @ViewData["Title"]
+            <br/>
+            <span class="text-sm">out of (estimated) <b>@Model.TotalCount</b> beatmaps ever downloaded</span>
         </div>
-        <br/>
-        <span class="text-sm">out of (estimated) <b>@Model.TotalCount</b> beatmaps ever downloaded</span>
         <form class="justify-center justify-self-end" method="POST" autocomplete="off">
             <input
                 name="beatmap"
