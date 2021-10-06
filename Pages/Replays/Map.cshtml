@@ -96,7 +96,7 @@ else
                 
                 <tr class="@(replay.PerfectCombo ? "font-bold" : "") @(isTopScore ? "border-purple-400 border-2" : "border-gray-300") text-center">
                     <td class="border border-gray-300 p-1.5 w-1/6">
-                        @DateTime.Parse(replay.Timestamp).ToUniversalTime().ToString($"HH:mm:ss, dd/MM/yyyy", CultureInfo.InvariantCulture)
+                        @replay.Timestamp.ToUniversalTime().ToString($"HH:mm:ss, dd/MM/yyyy", CultureInfo.InvariantCulture)
                     </td>
                     <td class="border border-gray-300 p-2">
                         @replay.Score.ToString("n0", CultureInfo.InvariantCulture)

@@ -1,3 +1,4 @@
+using System;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -21,7 +22,7 @@ namespace vault.Services.ReplayDatabase
         [BsonElement("max_combo")] public int MaxCombo;
         [BsonElement("perfect_combo")] public bool PerfectCombo;
         [BsonElement("mods")] public long Mods;
-        [BsonElement("timestamp")] public string Timestamp = "";
+        [BsonElement("timestamp")] public DateTime Timestamp;
         [BsonElement("sha256")] public string Sha256 = "";
         public string Accuracy = "";
     }

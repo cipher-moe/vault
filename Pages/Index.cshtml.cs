@@ -25,8 +25,8 @@ namespace vault.Pages
         {
             TotalReplayCount = await databaseService.Collection.EstimatedDocumentCountAsync();
             var query = databaseService.Collection.Find(FilterDefinition<Replay>.Empty);
-            FirstReplay = DateTime.Parse(query.Sort(Builders<Replay>.Sort.Ascending(r => r.Timestamp)).First().Timestamp).ToUniversalTime();
-            LastReplay = DateTime.Parse(query.Sort(Builders<Replay>.Sort.Descending(r => r.Timestamp)).First().Timestamp).ToUniversalTime();
+            FirstReplay = query.Sort(Builders<Replay>.Sort.Ascending(r => r.Timestamp)).First().Timestamp.ToUniversalTime();
+            LastReplay = query.Sort(Builders<Replay>.Sort.Descending(r => r.Timestamp)).First().Timestamp.ToUniversalTime();
         }
     }
 }
