@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,10 +17,11 @@ namespace vault.Pages.Replays
         [FromForm(Name = "beatmap")]
         public string? Beatmap { get; set; }
 
-        public readonly List<(string, int)> MostPlayedMaps;
+        public (List<(string, int)>, DateTime) MostPlayedMaps;
         public const string DefaultBeatmap = "c2a034a5c6d3a7fec931e065f4b12a66";
         public readonly Dictionary<string, Beatmap> Maps = new();
         public bool InvalidBeatmap = false;
+        public long TotalCount;
 
         private readonly BeatmapDataService beatmapDataService;
         private readonly ReplayDatabaseService replayDatabaseService;
@@ -28,12 +30,14 @@ namespace vault.Pages.Replays
         {
             this.beatmapDataService = beatmapDataService;
             this.replayDatabaseService = replayDatabaseService;
-            MostPlayedMaps = replayDatabaseService.MostPlayedMaps;
+            MostPlayedMaps = (replayDatabaseService.MostPlayedMaps, replayDatabaseService.LastUpdated);
         }
 
-        private async Task EnsureMapDataAvailable()
+        private async Task EnsureDataAvailable()
         {
-            var hashChunks = MostPlayedMaps
+            MostPlayedMaps = (replayDatabaseService.MostPlayedMaps, replayDatabaseService.LastUpdated);
+            TotalCount = await beatmapDataService.CountBeatmap();
+            var hashChunks = MostPlayedMaps.Item1
                 .Select(pair => pair.Item1)
                 .Chunk(6);
 
@@ -56,7 +60,7 @@ namespace vault.Pages.Replays
         
         public async Task OnGetAsync()
         {
-            await EnsureMapDataAvailable();
+            await EnsureDataAvailable();
         }
         
         public async Task<IActionResult> OnPostAsync()
@@ -73,7 +77,7 @@ namespace vault.Pages.Replays
                 if (replayCount == 0)
                 {
                     InvalidBeatmap = true;
-                    await EnsureMapDataAvailable();
+                    await EnsureDataAvailable();
                     return Page();
                 }
             }

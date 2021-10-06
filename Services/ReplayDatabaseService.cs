@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -35,6 +36,8 @@ namespace vault.Services
                     .Limit(50);
                 
                 replayDbService.MostPlayedMaps = aggregate.ToList(stoppingToken).Select(pair => (pair.Key, pair.Count)).ToList();
+                replayDbService.LastUpdated = DateTime.Now;
+                ;
 
                 foreach (var (map, _) in replayDbService.MostPlayedMaps)
                 {
@@ -52,6 +55,7 @@ namespace vault.Services
     {
         public readonly IMongoCollection<Replay> Collection;
         public List<(string, int)> MostPlayedMaps = new ();
+        public DateTime LastUpdated = DateTime.Now;
 
         public ReplayDatabaseService(MongoClient client)
         {

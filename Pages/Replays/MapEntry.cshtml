@@ -1,36 +1,29 @@
 @page "/replays/map/"
+@using Humanizer
 @model MapEntryModel
 
 @{
-    ViewData["Title"] = "Search beatmaps to view replay";
+    ViewData["Title"] = "Most played maps";
 }
 
-<div class="md:container mx-auto flex flex-col justify-center items-center text-center w-full">
-    <h3>
-        @if (Model.InvalidBeatmap)
-        {
-            @("Enter a ")
-            <b>valid</b>
-            @(" beatmap hash to jump to the relevant listing. ")
-            <br />
-            <b>@Model.Beatmap <span class="text-red-500 underline">wasn't</span></b>
-            @(@" valid - there wasn't any play associated with it.")
-        }
-        else
-        {
-            @("Enter a beatmap hash to jump to the relevant listing.")
-        }
-    </h3>
+<div class="md:container mx-auto flex flex-col justify-center text-center w-full">
+    <div class="flex flex-row justify-between">
+        <div class="text-3xl">
+            @ViewData["Title"]
+        </div>
+        <br/>
+        <span class="text-sm">out of (estimated) <b>@Model.TotalCount</b> beatmaps ever downloaded</span>
+        <form class="justify-center justify-self-end" method="POST" autocomplete="off">
+            <input
+                name="beatmap"
+                class="text-center w-full rounded-lg p-4 border-2 mr-0 text-black @(Model.InvalidBeatmap ? "border-red-50" : "border-gray-300")"
+                placeholder="Enter a beatmap hash"/>
+        </form>
+    </div>
     <br/>
-    <form class="justify-center my-4 flex flex-row w-full" method="POST" autocomplete="off">
-        <input
-            name="beatmap"
-            class="text-center w-1/2 rounded-lg p-4 border-2 mr-0 text-black border-gray-300 focus:border-gray-400 bg-white"
-            placeholder="@MapEntryModel.DefaultBeatmap"/>
-    </form>
-    <br />
-    <h3>Or take a look at the most played maps :</h3>
-    <br />
+    <div class="text-xs text-left">
+        Last updated <b>@((DateTime.Now - Model.MostPlayedMaps.Item2).Humanize())</b> ago.
+    </div>
     <table class="mt-4 table-fixed w-full border-collapse">
         <thead>
         <tr>
@@ -47,10 +40,10 @@
         </tr>
         </thead>
         <tbody>
-        @foreach (var (hash, count) in Model.MostPlayedMaps)
+        @foreach (var (hash, count) in Model.MostPlayedMaps.Item1)
         {
             var beatmap = Model.Maps.TryGetValue(hash, out var map) ? map : null;
-            
+
             <tr>
                 @{
                     <td class="border border-green-200 p-2 w-1/2 @(beatmap == null ? "bg-yellow-200" : "")">
@@ -66,7 +59,7 @@
                             {
                                 <span>Custom map</span>
                             }
-                            
+
                         </a>
                     </td>
                 }
