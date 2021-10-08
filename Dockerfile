@@ -9,6 +9,9 @@ COPY ["vault.csproj", "./"]
 RUN dotnet restore "vault.csproj"
 COPY . .
 WORKDIR "/src/"
+RUN apk add --no-cache npm
+RUN npm install --global yarn
+RUN yarn install --frozen-lockfile
 RUN dotnet build "vault.csproj" -c Release -o /app/build
 
 FROM build AS publish

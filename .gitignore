@@ -370,3 +370,6 @@ MigrationBackup/
 
 # JetBrains Rider
 .idea/
+
+# Minified CSS
+**/*.min.css
