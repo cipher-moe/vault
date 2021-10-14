@@ -36,7 +36,7 @@ namespace vault.Pages.Replays
 
         public long TotalCount = 0;
         public const int PageCount = 50;
-        public Replay[] Replays = Array.Empty<Replay>();
+        public List<Replay> Replays = new();
         public readonly Dictionary<string, Beatmap> Maps = new();
 
         [FromQuery(Name = "page")]
@@ -60,12 +60,11 @@ namespace vault.Pages.Replays
         public async Task OnGetAsync()
         {
             TotalCount = await service.Collection.EstimatedDocumentCountAsync();
-            Replays = service.Collection.Find(FilterDefinition<Replay>.Empty)
+            Replays = await service.Collection.Find(FilterDefinition<Replay>.Empty)
                 .SortByDescending(replay => replay.Timestamp)
                 .Skip((PageIndex - 1) * PageCount)
                 .Limit(PageCount)
-                .ToList()
-                .ToArray();
+                .ToListAsync();
 
 
             var hashChunks = Replays

@@ -40,8 +40,8 @@ namespace vault.Pages.Replays
             }
             
             TotalCount = await service.Collection.EstimatedDocumentCountAsync();
-            Replays = service.Collection.FindSync(Builders<Replay>.Filter.Eq("beatmap_hash", Hash))
-                .ToList()
+            Replays = (await service.Collection.FindSync(Builders<Replay>.Filter.Eq("beatmap_hash", Hash))
+                .ToListAsync())
                 .OrderByDescending(replay => replay.Score)
                 .ToArray();
             if (Replays.Length != 0)
