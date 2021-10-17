@@ -46,6 +46,7 @@
     <table class="table-fixed w-full border-collapse">
         <thead>
         <tr>
+            <th class="border border-green-900 w-14">Mode</th>
             <th class="border border-green-900 w-1/6">Timestamp (in UTC)</th>
             <th class="border border-green-900 w-1/12">Score</th>
             <th class="border border-green-900 w-1/6">Username</th>
@@ -63,6 +64,9 @@
         @foreach (var replay in Model.Replays)
         {
             <tr class="@(replay.PerfectCombo ? "bg-green-100" : "") border-gray-300 text-center">
+                <td class="border border-gray-300">
+                    <img class="h-7 mx-auto" src="@Icons.GetIconPath(replay.Mode)" alt="@ReplayRecentModel.Rulesets[replay.Mode].RulesetInfo.Name"/>
+                </td>
                 <td class="border border-gray-300 p-1.5 w-1/6">
                     @replay.Timestamp.ToUniversalTime().ToString($"HH:mm:ss, dd/MM/yyyy", CultureInfo.InvariantCulture)
                 </td>

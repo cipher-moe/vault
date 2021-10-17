@@ -18,11 +18,11 @@
     <PackageReference Include="ppy.osu.Game.Rulesets.Taiko" Version="2021.612.0" />
   </ItemGroup>
 
-  <Target 
-          Name="BuildTailwind"
-          BeforeTargets="PreBuildEvent"
-          Inputs="wwwroot/css/index.css;postcss.config.js;tailwind.config.js;package.json"
-          Outputs="wwwroot/css/tailwind.min.css">
+  <ItemGroup>
+    <Folder Include="wwwroot\images" />
+  </ItemGroup>
+
+  <Target Name="BuildTailwind" BeforeTargets="PreBuildEvent" Inputs="wwwroot/css/index.css;postcss.config.js;tailwind.config.js;package.json" Outputs="wwwroot/css/tailwind.min.css">
     <Exec Command="yarn css:build" />
   </Target>
 
