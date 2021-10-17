@@ -7,7 +7,7 @@ namespace vault.Services.ReplayDatabase
     public class Replay
     {
         [BsonElement("_id")] [BsonId] public ObjectId BsonDocumentId;
-        [BsonElement("name")] public int Mode;
+        [BsonElement("mode")] public int Mode;
         [BsonElement("version")] public int Version;
         [BsonElement("beatmap_hash")] public string BeatmapHash = "";
         [BsonElement("player_name")] public string PlayerName = "";

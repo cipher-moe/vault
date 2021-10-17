@@ -21,6 +21,7 @@ namespace vault.Pages.Replays
         public Beatmap? Map;
         public long TotalCount;
         public string Hash { get; set; } = "";
+        public SortedDictionary<int, Replay[]> SortedReplays = new();
         public Replay[] Replays = Array.Empty<Replay>();
         public Dictionary<LegacyMods, long> TopModScores = new();
 
@@ -40,10 +41,26 @@ namespace vault.Pages.Replays
             }
             
             TotalCount = await service.Collection.EstimatedDocumentCountAsync();
-            Replays = (await service.Collection.FindSync(Builders<Replay>.Filter.Eq("beatmap_hash", Hash))
-                .ToListAsync())
-                .OrderByDescending(replay => replay.Score)
-                .ToArray();
+
+            var cursor = await service.Collection.FindAsync(
+                Builders<Replay>.Filter.Eq("beatmap_hash", Hash),
+                new FindOptions<Replay>
+                {
+                    Sort = Builders<Replay>.Sort.Descending(replay => replay.Score)
+                }
+            );
+            var listing = (await cursor.ToListAsync())!;
+            Replays = listing.ToArray();
+            var groupedReplays = listing
+                .GroupBy(replay => replay.Mode)
+                .OrderBy(group => group.Key)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.ToArray()
+                );
+
+            SortedReplays = new SortedDictionary<int, Replay[]>(groupedReplays);
+                
             if (Replays.Length != 0)
                 Map = await beatmapDataService.GetByHash(Replays[0].BeatmapHash);
 

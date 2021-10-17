@@ -7,6 +7,7 @@
 @{
     var beatmap = Model.Map;
     var hasMap = beatmap != null;
+    var hasReplay = Model.SortedReplays.Any(mode => mode.Value.Length != 0);
     ViewData["Title"] = $"Replays for {(hasMap ? $"{beatmap!.Title} [{beatmap.Difficulty}]" : Model.Hash)}";
     ViewData["Description"] = $@"Found {Model.Replays.Length} "
                               + $"{(Model.Replays.Length > 1 ? "replay".Pluralize() : "replay")} with a maximum combo of"
@@ -68,15 +69,16 @@ else
 <div class="text-xs">
     Rows wrapped in <span class="text-purple-400 underline">purple</span> borders are top scores for the respective mod combination.
     <br/>
-    Rows with <b>bold</b> text indicate full-combo replays.
+    Rows fully in <b>bold</b> text indicate full-combo replays.
 </div>
 <br/>
 <div class="md:container mx-auto flex justify-center items-center w-full">
-    @if (Model.Replays.Length != 0)
+    @if (hasReplay)
     {
         <table class="table-fixed w-full border-collapse">
             <thead>
             <tr>
+                <th class="border border-green-900 w-14">Mode</th>
                 <th class="border border-green-900 w-1/6">Timestamp (in UTC)</th>
                 <th class="border border-green-900 w-1/12">Score</th>
                 <th class="border border-green-900 w-1/6">Username</th>
@@ -91,75 +93,62 @@ else
             </tr>
             </thead>
             <tbody>
-            @if (Model.Replays.Length != 0)
-            {
-                <tr class="font-bold border-gray-300 text-center">
-                    <td class="border border-gray-300 p-1.5 w-1/6">
-                        Best result
-                    </td>
-                    <td class="border border-gray-300 p-2">
-                        @Model.Replays.Max(rep => rep.Score).ToString("n0", CultureInfo.InvariantCulture)
-                    </td>
-                    <td class="border border-gray-300 p-2"></td>
-                    <td class="border border-gray-300 p-2">
-                        @Model.Replays.Max(rep => rep.MaxCombo)
-                    </td>
-                    <td class="border border-gray-300 p-2">
-                        @($"{Model.Replays.Max(rep => double.Parse(rep.Accuracy)):0.###}%")
-                    </td>
-                    <td class="border border-gray-300 p-2">
-                    </td>
-                    <td class="border border-gray-300 p-0 w-1/12 bg-blue-100"></td>
-                    <td class="border border-gray-300 p-0 w-1/12 bg-green-100"></td>
-                    <td class="border border-gray-300 p-0 w-1/12 bg-yellow-100"></td>
-                    <td class="border border-gray-300 p-0 w-1/12 bg-red-100">
-                        @Model.Replays.Min(rep => rep.CountMiss)
-                    </td>
-                    <td class="border border-gray-300 p-2"></td>
-                </tr>
-            }
-            @foreach (var replay in Model.Replays)
-            {
-                var isTopScore = Model.TopModScores[(LegacyMods)replay.Mods] == replay.Score;
 
-                <tr class="@(replay.PerfectCombo ? "font-bold" : "") @(isTopScore ? "border-purple-400 border-2" : "border-gray-300") text-center">
-                    <td class="border border-gray-300 p-1.5 w-1/6">
-                        @replay.Timestamp.ToUniversalTime().ToString($"HH:mm:ss, dd/MM/yyyy", CultureInfo.InvariantCulture)
-                    </td>
-                    <td class="border border-gray-300 p-2">
-                        @replay.Score.ToString("n0", CultureInfo.InvariantCulture)
-                    </td>
-                    <td class="border border-gray-300 p-2">
-                        @replay.PlayerName
-                    </td>
-                    <td class="border border-gray-300 p-2">
-                        @replay.MaxCombo
-                    </td>
-                    <td class="border border-gray-300 p-2">
-                        @replay.Accuracy%
-                    </td>
-                    <td class="border border-gray-300 p-2">
-                        @{
-                            var mods = ReplayRecentModel.ModsFromModbits(ReplayRecentModel.Rulesets[replay.Mode], (LegacyMods)replay.Mods);
-                            var acronyms = string.Join(", ", mods.Select(mod => mod.Acronym));
-                            if ((replay.Mods & (1 << 29)) != 0)
-                                acronyms += (string.IsNullOrEmpty(acronyms) ? "" : ", ") + "V2";
-                        }
-                        @(string.IsNullOrWhiteSpace(acronyms) ? "None" : acronyms)
-                    </td>
-                    <td class="border border-gray-300 p-0 w-1/12 bg-blue-100">@replay.Count300</td>
-                    <td class="border border-gray-300 p-0 w-1/12 bg-green-100">@replay.Count100</td>
-                    <td class="border border-gray-300 p-0 w-1/12 bg-yellow-100">@replay.Count50</td>
-                    <td class="border border-gray-300 p-0 w-1/12 bg-red-100">@replay.CountMiss</td>
-                    <td class="border border-gray-300 p-2 w-1/12">
-                        <a href="https://poetry-rewind.cipher.moe/@Model.Hash/@replay.Sha256">
-                            <span class="underline" title="@replay.Sha256.ToLowerInvariant()">
-                                @replay.Sha256[..7].ToLowerInvariant()
-                            </span>
-                            <i class="fa fa-download" aria-hidden="true"></i>
-                        </a>
-                    </td>
-                </tr>
+            @foreach (var (mode, replays) in Model.SortedReplays)
+            {
+                var maxScore = replays.Max(rep => rep.Score);
+                var maxCombo = replays.Max(rep => rep.MaxCombo);
+                var maxAccuracy = replays.Max(rep => double.Parse(rep.Accuracy)).ToString("0.###");
+                var minMiss = replays.Min(rep => rep.CountMiss);
+                
+                @foreach (var replay in replays)
+                {
+                    var isTopScore = Model.TopModScores[(LegacyMods)replay.Mods] == replay.Score;
+
+                    <tr class="@(replay.PerfectCombo ? "font-bold" : "") @(isTopScore ? "border-purple-400 border-2" : "border-gray-300") text-center">
+                        <td class="border border-gray-300">
+                            <img class="h-7 mx-auto" src="@Icons.GetIconPath(replay.Mode)" alt="@ReplayRecentModel.Rulesets[replay.Mode].RulesetInfo.Name"/>
+                        </td>
+                        <td class="border border-gray-300 p-1.5 w-1/6">
+                            @replay.Timestamp.ToUniversalTime().ToString($"HH:mm:ss, dd/MM/yyyy", CultureInfo.InvariantCulture)
+                        </td>
+                        <td class="border border-gray-300 p-2 @(replay.Score == maxScore ? "bg-gray-200 font-bold" : "")">
+                            @replay.Score.ToString("n0", CultureInfo.InvariantCulture)
+                        </td>
+                        <td class="border border-gray-300 p-2">
+                            @replay.PlayerName
+                        </td>
+                        <td class="border border-gray-300 p-2 @(replay.MaxCombo == maxCombo ? "bg-gray-200 font-bold" : "")">
+                            @replay.MaxCombo
+                        </td>
+                        <td class="border border-gray-300 p-2 @(replay.Accuracy == maxAccuracy ? "bg-gray-200 font-bold" : "")">
+                            @replay.Accuracy%
+                        </td>
+                        <td class="border border-gray-300 p-2">
+                            @{
+                                var mods = ReplayRecentModel.ModsFromModbits(ReplayRecentModel.Rulesets[replay.Mode], (LegacyMods)replay.Mods);
+                                var acronyms = string.Join(", ", mods.Select(mod => mod.Acronym));
+                                if ((replay.Mods & (1 << 29)) != 0)
+                                    acronyms += (string.IsNullOrEmpty(acronyms) ? "" : ", ") + "V2";
+                            }
+                            @(string.IsNullOrWhiteSpace(acronyms) ? "None" : acronyms)
+                        </td>
+                        <td class="border border-gray-300 p-0 w-1/12 bg-blue-100">@replay.Count300</td>
+                        <td class="border border-gray-300 p-0 w-1/12 bg-green-100">@replay.Count100</td>
+                        <td class="border border-gray-300 p-0 w-1/12 bg-yellow-100">@replay.Count50</td>
+                        <td class="border border-gray-300 p-0 w-1/12 bg-red-100 @(replay.CountMiss == minMiss ? "filter brightness-90 font-bold" : "")">
+                            @replay.CountMiss
+                        </td>
+                        <td class="border border-gray-300 p-2 w-1/12">
+                            <a href="https://poetry-rewind.cipher.moe/@Model.Hash/@replay.Sha256">
+                                <span class="underline" title="@replay.Sha256.ToLowerInvariant()">
+                                    @replay.Sha256[..7].ToLowerInvariant()
+                                </span>
+                                <i class="fa fa-download" aria-hidden="true"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
             }
             </tbody>
         </table>
