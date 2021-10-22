@@ -112,16 +112,16 @@ else
                         <td class="border border-gray-300 p-1.5 w-1/6">
                             @replay.Timestamp.ToUniversalTime().ToString($"HH:mm:ss, dd/MM/yyyy", CultureInfo.InvariantCulture)
                         </td>
-                        <td class="border border-gray-300 p-2 @(replay.Score == maxScore ? "bg-gray-200 font-bold" : "")">
+                        <td class="border border-gray-300 p-2 @(replay.Score == maxScore ? "font-bold" : "")">
                             @replay.Score.ToString("n0", CultureInfo.InvariantCulture)
                         </td>
                         <td class="border border-gray-300 p-2">
                             @replay.PlayerName
                         </td>
-                        <td class="border border-gray-300 p-2 @(replay.MaxCombo == maxCombo ? "bg-gray-200 font-bold" : "")">
+                        <td class="border border-gray-300 p-2 @(replay.MaxCombo == maxCombo ? "font-bold" : "")">
                             @replay.MaxCombo
                         </td>
-                        <td class="border border-gray-300 p-2 @(replay.Accuracy == maxAccuracy ? "bg-gray-200 font-bold" : "")">
+                        <td class="border border-gray-300 p-2 @(replay.Accuracy == maxAccuracy ? "font-bold" : "")">
                             @replay.Accuracy%
                         </td>
                         <td class="border border-gray-300 p-2">
@@ -136,7 +136,7 @@ else
                         <td class="border border-gray-300 p-0 w-1/12 bg-blue-100">@replay.Count300</td>
                         <td class="border border-gray-300 p-0 w-1/12 bg-green-100">@replay.Count100</td>
                         <td class="border border-gray-300 p-0 w-1/12 bg-yellow-100">@replay.Count50</td>
-                        <td class="border border-gray-300 p-0 w-1/12 bg-red-100 @(replay.CountMiss == minMiss ? "filter brightness-90 font-bold" : "")">
+                        <td class="border border-gray-300 p-0 w-1/12 bg-red-100 @(replay.CountMiss == minMiss ? "font-bold" : "")">
                             @replay.CountMiss
                         </td>
                         <td class="border border-gray-300 p-2 w-1/12">
