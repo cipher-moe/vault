@@ -5,6 +5,10 @@
 @model ReplayMapModel
 
 @{
+    const string clickableColumnHeaderStyle = "text-blue-800 hover:text-blue-600";
+}
+
+@{
     var beatmap = Model.Map;
     var hasMap = beatmap != null;
     var hasReplay = Model.SortedReplays.Any(mode => mode.Value.Length != 0);
@@ -67,9 +71,14 @@ else
 }
 <br/>
 <div class="text-xs">
-    Rows wrapped in <span class="text-purple-400 underline">purple</span> borders are top scores for the respective mod combination.
+    Rows wrapped in <span class="text-purple-400 underline"><b>purple</b></span> borders are top scores for the respective mod combination.
     <br/>
-    Rows fully in <b>bold</b> text indicate full-combo replays.
+    @if (Model.Replays.Any(replay => replay.PerfectCombo))
+    {
+        <span>Rows fully in <b>bold</b> text indicate full-combo replays.</span>
+        <br />
+    }
+    Click column headers in <span class="@clickableColumnHeaderStyle"><b>blue</b></span> to sort by the respective category. 
 </div>
 <br/>
 <div class="md:container mx-auto flex justify-center items-center w-full">
@@ -78,17 +87,50 @@ else
         <table class="table-fixed w-full border-collapse">
             <thead>
             <tr>
+                @{
+                    var sortMode = Model.Order;
+                }
                 <th class="border border-green-900 w-14">Mode</th>
-                <th class="border border-green-900 w-1/6">Timestamp (in UTC)</th>
-                <th class="border border-green-900 w-1/12">Score</th>
+                <th class="border border-green-900 w-1/6">
+                    <a 
+                        href="?sort=timestamp"
+                        class="@clickableColumnHeaderStyle @(sortMode == ReplayMapModel.SortBy.Timestamp ? "underline" : "")">
+                        Timestamp (in UTC)
+                    </a>
+                </th>
+                <th class="border border-green-900 w-1/12">
+                    <a
+                        href="?sort=score"
+                        class="@clickableColumnHeaderStyle @(sortMode == ReplayMapModel.SortBy.Score ? "underline" : "")">
+                        Score
+                    </a>
+                </th>
                 <th class="border border-green-900 w-1/6">Username</th>
-                <th class="border border-green-900 w-1/12">Max combo</th>
-                <th class="border border-green-900 w-1/12">Accuracy</th>
+                <th class="border border-green-900 w-1/12">
+                    <a
+                        href="?sort=combo"
+                        class="@clickableColumnHeaderStyle @(sortMode == ReplayMapModel.SortBy.Combo ? "underline" : "")">
+                        Max combo
+                    </a>
+                </th>
+                <th class="border border-green-900 w-1/12">
+                    <a
+                        href="?sort=accuracy"
+                        class="@clickableColumnHeaderStyle @(sortMode == ReplayMapModel.SortBy.Accuracy ? "underline" : "")">
+                        Accuracy
+                    </a>
+                </th>
                 <th class="border border-green-900 w-1/12">Mods</th>
                 <th class="border border-green-900 w-1/12">300s</th>
                 <th class="border border-green-900 w-1/12">100s</th>
                 <th class="border border-green-900 w-1/12">50s</th>
-                <th class="border border-green-900 w-1/12">Misses</th>
+                <th class="border border-green-900 w-1/12">
+                    <a 
+                        href="?sort=miss"
+                        class="@clickableColumnHeaderStyle @(sortMode == ReplayMapModel.SortBy.Miss ? "underline" : "")">
+                        Misses
+                    </a>
+                </th>
                 <th class="border border-green-900 w-1/12">Download</th>
             </tr>
             </thead>

@@ -25,6 +25,20 @@ namespace vault.Pages.Replays
         public Replay[] Replays = Array.Empty<Replay>();
         public Dictionary<LegacyMods, long> TopModScores = new();
 
+        public enum SortBy
+        {
+            Score = 0,
+            Combo,
+            Accuracy,
+            Miss,
+            Timestamp,
+            Time = Timestamp
+        }
+
+        [FromQuery(Name = "sort")]
+        public SortBy? Order { get; set; }
+
+
         public ReplayMapModel(ReplayDatabaseService service, BeatmapDataService beatmapDataService)
         {
             this.service = service;
@@ -42,11 +56,24 @@ namespace vault.Pages.Replays
             
             TotalCount = await service.Collection.EstimatedDocumentCountAsync();
 
+            var sortDefinition = Order switch
+            {
+                SortBy.Timestamp or SortBy.Time => Builders<Replay>.Sort.Descending(replay => replay.Timestamp),
+                SortBy.Combo => Builders<Replay>.Sort.Descending(replay => replay.MaxCombo),
+                SortBy.Miss => Builders<Replay>.Sort.Ascending(replay => replay.CountMiss),
+                SortBy.Accuracy => Builders<Replay>.Sort.Combine(
+                    Builders<Replay>.Sort.Descending(replay => replay.Count300),
+                    Builders<Replay>.Sort.Descending(replay => replay.Count100),
+                    Builders<Replay>.Sort.Descending(replay => replay.Count50)
+                ),
+                _ => Builders<Replay>.Sort.Descending(replay => replay.Score)
+            };
+                
             var cursor = await service.Collection.FindAsync(
                 Builders<Replay>.Filter.Eq("beatmap_hash", Hash),
                 new FindOptions<Replay>
                 {
-                    Sort = Builders<Replay>.Sort.Descending(replay => replay.Score)
+                    Sort = sortDefinition
                 }
             );
             var listing = (await cursor.ToListAsync())!;
