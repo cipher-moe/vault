@@ -31,7 +31,7 @@
                 background-attachment: fixed;
             } 
         </style>
-    <div class="text-3xl">
+    <div class="text-3xl text-center xl:text-left">
         @Model.Replays.Length replay@(Model.Replays.Length > 1 ? "s" : "") for
         <a class="underline" href="https://osu.ppy.sh/b/@beatmap.BeatmapId">@beatmap.Title [@beatmap.Difficulty]</a>
         <br/>
@@ -83,9 +83,12 @@ else
     Click column headers in <span class="@clickableColumnHeaderTextStyle"><b>blue</b></span> to sort by the respective category. 
 </div>
 <br/>
-<div class="md:container mx-auto flex justify-center items-center w-full">
+<div class="xl:container mx-auto flex justify-center items-center w-full">
     @if (hasReplay)
     {
+        const string
+            cellShowInLargePage = "hidden xl:table-cell",
+            cellHideInLargePage = "xl:hidden";
         <table class="table-fixed w-full border-collapse">
             <thead>
             <tr>
@@ -128,9 +131,10 @@ else
                     </a>
                 </th>
                 <th class="border border-green-900 w-1/12">Mods</th>
-                <th class="border border-green-900 w-1/12">300s</th>
-                <th class="border border-green-900 w-1/12">100s</th>
-                <th class="border border-green-900 w-1/12">50s</th>
+                <th class="border border-green-900 w-1/12 @cellShowInLargePage">300s</th>
+                <th class="border border-green-900 w-1/12 @cellShowInLargePage">100s</th>
+                <th class="border border-green-900 w-1/12 @cellShowInLargePage">50s</th>
+                <th class="border border-green-900 w-1/12 @cellHideInLargePage">Hit counts</th>
                 <th class="border border-green-900 w-1/12 @(isMiss ? chosenColumnHeaderCellStyle : "")">
                     <a 
                         href="?sort=miss"
@@ -182,9 +186,12 @@ else
                             }
                             @(string.IsNullOrWhiteSpace(acronyms) ? "None" : acronyms)
                         </td>
-                        <td class="border border-gray-300 p-0 w-1/12 bg-blue-100">@replay.Count300</td>
-                        <td class="border border-gray-300 p-0 w-1/12 bg-green-100">@replay.Count100</td>
-                        <td class="border border-gray-300 p-0 w-1/12 bg-yellow-100">@replay.Count50</td>
+                        <td class="border border-gray-300 p-0 w-1/12 bg-blue-100 @cellShowInLargePage">@replay.Count300</td>
+                        <td class="border border-gray-300 p-0 w-1/12 bg-green-100 @cellShowInLargePage">@replay.Count100</td>
+                        <td class="border border-gray-300 p-0 w-1/12 bg-yellow-100 @cellShowInLargePage">@replay.Count50</td>
+                        <td class="border border-gray-300 p-2 @cellHideInLargePage">
+                            <b>@replay.Count300</b> - <b>@replay.Count100</b> - <b>@replay.Count50</b>
+                        </td>
                         <td class="border border-gray-300 p-0 w-1/12 bg-red-100 @(replay.CountMiss == minMiss ? "font-bold" : "")">
                             @replay.CountMiss
                         </td>

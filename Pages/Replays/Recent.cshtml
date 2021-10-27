@@ -9,12 +9,14 @@
 }
 
 <div class="text-3xl">
-    @ViewData["Title"]
+    <div class="text-center xl:text-left">
+        @ViewData["Title"]
+        <br/>
+        <span class="text-sm">out of (estimated) <b>@Model.TotalCount</b> replays</span>
+    </div>
     <br/>
-    <span class="text-sm">out of (estimated) <b>@Model.TotalCount</b> replays</span>
-    <br />
-    <br />
-    <div class="text-xs">
+    <br/>
+    <div class="text-xs ml-2 xl:ml-0">
         Rows with <span class="bg-green-100">light green</span> background indicate full-combo replays.
     </div>
 </div>
@@ -24,7 +26,7 @@
 }
 
 <div class="grid place-items-end pb-2">
-    <div>
+    <div class="mr-2 xl:mr-0">
         @if (canGoBack)
         {
             <a href="?page=@(Model.PageIndex - 1)">
@@ -42,21 +44,27 @@
     </div>
 </div>
 
-<div class="md:container mx-auto flex justify-center items-center w-full">
+<div class="xl:container mx-auto flex justify-center items-center w-full">
     <table class="table-fixed w-full border-collapse">
+        @{
+            const string
+                cellShowInLargePage = "hidden xl:table-cell",
+                cellHideInLargePage = "xl:hidden";
+        }
         <thead>
         <tr>
-            <th class="border border-green-900 w-14">Mode</th>
-            <th class="border border-green-900 w-1/6">Timestamp (in UTC)</th>
-            <th class="border border-green-900 w-1/12">Score</th>
-            <th class="border border-green-900 w-1/6">Username</th>
+            <th class="border border-green-900 w-1/12 xl:w-14">Mode</th>
+            <th class="border border-green-900 w-1/12 xl:w-1/6">Timestamp (in UTC)</th>
+            <th class="border border-green-900 w-1/12 @cellShowInLargePage">Score</th>
+            <th class="border border-green-900 w-1/12 xl:w-1/6">Username</th>
             <th class="border border-green-900 w-1/12">Max combo</th>
             <th class="border border-green-900 w-1/12">Accuracy</th>
-            <th class="border border-green-900 w-1/12">300s</th>
-            <th class="border border-green-900 w-1/12">100s</th>
-            <th class="border border-green-900 w-1/12">50s</th>
-            <th class="border border-green-900 w-1/12">Misses</th>
-            <th class="border border-green-900 w-1/4">Map</th>
+            <th class="border border-green-900 w-1/12 @cellShowInLargePage">300s</th>
+            <th class="border border-green-900 w-1/12 @cellShowInLargePage">100s</th>
+            <th class="border border-green-900 w-1/12 @cellShowInLargePage">50s</th>
+            <th class="border border-green-900 w-1/12 @cellShowInLargePage">Misses</th>
+            <th class="border border-green-900 w-1/12 @cellHideInLargePage">Statistics</th>
+            <th class="border border-green-900 w-1/6 xl:w-1/4">Map</th>
             <th class="border border-green-900 w-1/12">Download</th>
         </tr>
         </thead>
@@ -64,28 +72,33 @@
         @foreach (var replay in Model.Replays)
         {
             <tr class="@(replay.PerfectCombo ? "bg-green-100" : "") border-gray-300 text-center">
-                <td class="border border-gray-300">
-                    <img class="h-7 mx-auto" src="@Icons.GetIconPath(replay.Mode)" alt="@ReplayRecentModel.Rulesets[replay.Mode].RulesetInfo.Name"/>
+                <td class="border border-gray-300 w-7 xl:w-14">
+                    <img class="h-7 mx-auto hidden xl:inline"
+                         src="@Icons.GetIconPath(replay.Mode)" alt="@ReplayRecentModel.Rulesets[replay.Mode].RulesetInfo.Name"/>
+                    <span class="xl:hidden">
+                        @ReplayRecentModel.Rulesets[replay.Mode].RulesetInfo.Name
+                    </span>
                 </td>
                 <td class="border border-gray-300 p-1.5 w-1/6">
                     @replay.Timestamp.ToUniversalTime().ToString($"HH:mm:ss, dd/MM/yyyy", CultureInfo.InvariantCulture)
                 </td>
-                <td class="border border-gray-300 p-2">
+                <td class="border border-gray-300 p-2 @cellShowInLargePage">
                     @replay.Score.ToString("n0", CultureInfo.InvariantCulture)
                 </td>
                 <td class="border border-gray-300 p-2">
                     @replay.PlayerName
                 </td>
-                <td class="border border-gray-300 p-2">
-                    @replay.MaxCombo
+                <td class="border border-gray-300 p-2">@replay.MaxCombo</td>
+                <td class="border border-gray-300 p-2">@replay.Accuracy%</td>
+                <td class="border border-gray-300 p-0 w-1/12 @cellShowInLargePage">@replay.Count300</td>
+                <td class="border border-gray-300 p-0 w-1/12 @cellShowInLargePage">@replay.Count100</td>
+                <td class="border border-gray-300 p-0 w-1/12 @cellShowInLargePage">@replay.Count50</td>
+                <td class="border border-gray-300 p-0 w-1/12 @cellShowInLargePage">@replay.CountMiss</td>
+                <td class="border border-gray-300 p-0 w-1/12 @cellHideInLargePage">
+                    <b>@replay.Score.ToString("n0", CultureInfo.InvariantCulture)</b>
+                    <br/>
+                    <b>@replay.Count300</b> / <b>@replay.Count100</b> / <b>@replay.Count50</b> / <b>@replay.CountMiss</b>
                 </td>
-                <td class="border border-gray-300 p-2">
-                    @replay.Accuracy%
-                </td>
-                <td class="border border-gray-300 p-0 w-1/12">@replay.Count300</td>
-                <td class="border border-gray-300 p-0 w-1/12">@replay.Count100</td>
-                <td class="border border-gray-300 p-0 w-1/12">@replay.Count50</td>
-                <td class="border border-gray-300 p-0 w-1/12">@replay.CountMiss</td>
                 @{
                     var beatmap = Model.Maps.TryGetValue(replay.BeatmapHash, out var map) ? map : null;
                     <td class="border border-gray-300 p-2 w-1/4 @(beatmap == null ? "bg-yellow-200" : "")">
@@ -116,6 +129,7 @@
                         <span class="underline" title="@replay.Sha256.ToLowerInvariant()">
                             @replay.Sha256[..7].ToLowerInvariant()
                         </span>
+                        <br class="inline xl:hidden" />
                         <i class="fa fa-download" aria-hidden="true"></i>
                     </a>
                 </td>

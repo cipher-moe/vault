@@ -6,22 +6,23 @@
     ViewData["Title"] = "Most played maps";
 }
 
-<div class="md:container mx-auto flex flex-col justify-center text-center w-full">
-    <div class="flex flex-row justify-between">
-        <div class="text-3xl text-left">
+<div class="xl:container mx-auto flex flex-col justify-center text-center w-full">
+    <div class="flex flex-col lg:flex-row lg:justify-between">
+        <div class="text-3xl ml-0 text-center lg:ml-2 xl:ml-0 lg:text-left">
             @ViewData["Title"]
             <br/>
             <span class="text-sm">out of (estimated) <b>@Model.TotalCount</b> beatmaps ever downloaded</span>
         </div>
+        <br class="inline lg:hidden" />
         <form class="justify-center justify-self-end" method="POST" autocomplete="off">
             <input
                 name="beatmap"
-                class="text-center w-full rounded-lg p-4 border-2 mr-0 text-black @(Model.InvalidBeatmap ? "border-red-500" : "border-gray-300")"
+                class="text-center w-1/2 lg:w-full rounded-lg p-4 border-2 mr-0 lg:mr-2 xl:mr-0 text-black @(Model.InvalidBeatmap ? "border-red-500" : "border-gray-300")"
                 placeholder="Enter a @(Model.InvalidBeatmap ? "valid beatmap" : "beatmap") hash"/>
         </form>
     </div>
     <br/>
-    <div class="text-xs text-left">
+    <div class="text-xs text-center xl:text-left">
         Last updated <b>@((DateTime.Now - Model.MostPlayedMaps.Item2).Humanize())</b> ago.
     </div>
     <table class="mt-4 table-fixed w-full border-collapse">
