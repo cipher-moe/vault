@@ -1,16 +1,14 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using MongoDB.Driver;
+using Microsoft.Extensions.Logging;
 using OsuSharp;
+using vault.Databases;
 using vault.Services;
 
 namespace vault
@@ -31,7 +29,6 @@ namespace vault
             services.AddLogging();
             services.AddRazorPages();
             services.AddSession(session => session.IdleTimeout = TimeSpan.FromMinutes(30));
-            services.AddSingleton(new MongoClient(Environment.GetEnvironmentVariable("MONGODB_URI")));
             services.AddSingleton(httpClient);
             services.AddSingleton(
                 new OsuClient(new OsuSharpConfiguration{
@@ -39,9 +36,36 @@ namespace vault
                     HttpClient = httpClient
                 })
             );
-            services.AddSingleton<BeatmapDataService>();
-            services.AddSingleton<ReplayDatabaseService>();
-            services.AddHostedService<RefreshMostPlayedMapsService>();
+            services.AddDbContext<ReplayDbContext>(builder =>
+            {
+                var connectionString = Environment.GetEnvironmentVariable("MARIADB_CONNECTION_STRING")!;
+                builder
+                    .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
+                    .UseLoggerFactory(
+                        LoggerFactory.Create(
+                            b => b
+                                .AddConsole()
+                                .AddFilter(level => level >= LogLevel.Information)))
+                    .EnableSensitiveDataLogging()
+                    .EnableDetailedErrors();
+            });
+            
+            services.AddDbContext<BeatmapDbContext>(builder =>
+            {
+                var connectionString = Environment.GetEnvironmentVariable("MARIADB_CONNECTION_STRING")!;
+                builder
+                    .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
+                    .UseLoggerFactory(
+                        LoggerFactory.Create(
+                            b => b
+                                .AddConsole()
+                                .AddFilter(level => level >= LogLevel.Information)))
+                    .EnableSensitiveDataLogging()
+                    .EnableDetailedErrors();
+            });
+
+            services.AddHostedService<MostPlayedMapsHostedService>();
+            services.AddSingleton<MostPlayedMapsService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

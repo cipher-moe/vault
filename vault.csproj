@@ -9,8 +9,8 @@
     <PackageReference Include="BitFaster.Caching" Version="1.0.4" />
     <PackageReference Include="ChunkExtensionMethod" Version="1.0.2" />
     <PackageReference Include="dotenv.net" Version="3.0.0" />
-    <PackageReference Include="MongoDB.Driver" Version="2.12.4" />
     <PackageReference Include="OsuSharp" Version="5.4.4" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="5.0.3" />
     <PackageReference Include="ppy.osu.Game" Version="2021.612.0" />
     <PackageReference Include="ppy.osu.Game.Rulesets.Catch" Version="2021.612.0" />
     <PackageReference Include="ppy.osu.Game.Rulesets.Mania" Version="2021.612.0" />

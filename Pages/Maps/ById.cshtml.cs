@@ -1,16 +1,16 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using vault.Services;
+using vault.Databases;
 
 namespace vault.Pages.Maps
 {
     public class ById : PageModel
     {
-        private readonly BeatmapDataService beatmapDataService;
-        public ById(BeatmapDataService beatmapDataService)
+        private readonly BeatmapDbContext beatmapDbContext;
+        public ById(BeatmapDbContext beatmapDbContext)
         {
-            this.beatmapDataService = beatmapDataService;
+            this.beatmapDbContext = beatmapDbContext;
         }
         
         public async Task<IActionResult> OnGetAsync()
@@ -21,7 +21,7 @@ namespace vault.Pages.Maps
                 return Redirect("/Maps");
             }
 
-            var beatmapHash = await beatmapDataService.GetBeatmapHash(id);
+            var beatmapHash = await beatmapDbContext.GetBeatmapHash(id);
             if (beatmapHash != null)
                 return Redirect("/Replays/Map/" + beatmapHash);
             return Redirect("/Maps");

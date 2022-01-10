@@ -1,13 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson.Serialization.Conventions;
 
 namespace vault
 {
@@ -16,11 +10,6 @@ namespace vault
         public static void Main(string[] args)
         {
             dotenv.net.DotEnv.Load();
-            ConventionRegistry.Register(
-                "IgnoreExtraElements",
-                new ConventionPack { new IgnoreExtraElementsConvention(true) },
-                _ => true
-            );
             CreateHostBuilder(args).Build().Run();
         }
 

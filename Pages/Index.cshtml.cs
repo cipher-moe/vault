@@ -1,32 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Logging;
-using MongoDB.Driver;
-using vault.Services;
-using vault.Services.ReplayDatabase;
+using Microsoft.EntityFrameworkCore;
+using vault.Databases;
 
 namespace vault.Pages
 {
     public class IndexModel : PageModel
     {
-        private readonly ReplayDatabaseService databaseService;
+        private readonly ReplayDbContext dbContext;
         public long TotalReplayCount;
         public DateTime FirstReplay, LastReplay;
-        public IndexModel(ReplayDatabaseService databaseService)
+        public IndexModel(ReplayDbContext dbContext)
         {
-            this.databaseService = databaseService;
+            this.dbContext = dbContext;
         }
 
         public async Task OnGetAsync()
         {
-            TotalReplayCount = await databaseService.Collection.EstimatedDocumentCountAsync();
-            var query = databaseService.Collection.Find(FilterDefinition<Replay>.Empty);
-            FirstReplay = query.Sort(Builders<Replay>.Sort.Ascending(r => r.Timestamp)).First().Timestamp.ToUniversalTime();
-            LastReplay = query.Sort(Builders<Replay>.Sort.Descending(r => r.Timestamp)).First().Timestamp.ToUniversalTime();
+            TotalReplayCount = await dbContext.Replays.CountAsync();
+            FirstReplay = (await dbContext.Replays.FromSqlRaw("SELECT * FROM `replays` ORDER BY `timestamp` ASC LIMIT 1").FirstAsync()).Timestamp;
+            LastReplay = (await dbContext.Replays.FromSqlRaw("SELECT * FROM `replays` ORDER BY `timestamp` DESC LIMIT 1").FirstAsync()).Timestamp;
         }
     }
 }

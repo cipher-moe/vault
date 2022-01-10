@@ -1,11 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BAMCIS.ChunkExtensionMethod;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Legacy;
 using osu.Game.Rulesets;
@@ -16,9 +15,9 @@ using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Taiko;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
-using vault.Services;
+using vault.Databases;
 using Beatmap = OsuSharp.Beatmap;
-using Replay = vault.Services.ReplayDatabase.Replay;
+using Replay = vault.Entities.Replay;
 
 namespace vault.Pages.Replays
 {
@@ -31,8 +30,8 @@ namespace vault.Pages.Replays
     
     public class ReplayRecentModel : PageModel
     {
-        private readonly ReplayDatabaseService service;
-        private readonly BeatmapDataService beatmapDataService;
+        private readonly ReplayDbContext replayDbContext;
+        private readonly BeatmapDbContext beatmapDbContext;
 
         public long TotalCount = 0;
         public const int PageCount = 50;
@@ -42,10 +41,10 @@ namespace vault.Pages.Replays
         [FromQuery(Name = "page")]
         public int PageIndex { get; set; } = 1;
 
-        public ReplayRecentModel(ReplayDatabaseService service, BeatmapDataService beatmapDataService)
+        public ReplayRecentModel(ReplayDbContext replayDbContext, BeatmapDbContext beatmapDbContext)
         {
-            this.service = service;
-            this.beatmapDataService = beatmapDataService;
+            this.replayDbContext = replayDbContext;
+            this.beatmapDbContext = beatmapDbContext;
         }
         
         public static readonly LegacyScoreDecoder ScoreDecoder = new ();
@@ -59,11 +58,11 @@ namespace vault.Pages.Replays
         
         public async Task OnGetAsync()
         {
-            TotalCount = await service.Collection.EstimatedDocumentCountAsync();
-            Replays = await service.Collection.Find(FilterDefinition<Replay>.Empty)
-                .SortByDescending(replay => replay.Timestamp)
+            TotalCount = await replayDbContext.Replays.CountAsync();
+            Replays = await replayDbContext.Replays
+                .OrderByDescending(replay => replay.Timestamp)
                 .Skip((PageIndex - 1) * PageCount)
-                .Limit(PageCount)
+                .Take(PageCount)
                 .ToListAsync();
 
 
@@ -79,7 +78,7 @@ namespace vault.Pages.Replays
                     chunk
                         .Select(async hash =>
                         {
-                            var beatmap = await beatmapDataService.GetByHash(hash);
+                            var beatmap = await beatmapDbContext.GetByHash(hash);
                             return (hash, beatmap);
                         }));
 

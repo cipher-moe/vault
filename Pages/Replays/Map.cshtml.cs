@@ -4,20 +4,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
 using osu.Game.Beatmaps.Legacy;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
 using OsuSharp;
-using vault.Services;
-using Replay = vault.Services.ReplayDatabase.Replay;
+using vault.Databases;
+using Replay = vault.Entities.Replay;
 
 namespace vault.Pages.Replays
 {
     public class ReplayMapModel : PageModel
     {
-        private readonly ReplayDatabaseService service;
-        private readonly BeatmapDataService beatmapDataService;
+        private readonly ReplayDbContext replayDbContext;
+        private readonly BeatmapDbContext beatmapDbContext;
         public Beatmap? Map;
         public long TotalCount;
         public string Hash { get; set; } = "";
@@ -39,10 +39,10 @@ namespace vault.Pages.Replays
         public SortBy? Order { get; set; }
 
 
-        public ReplayMapModel(ReplayDatabaseService service, BeatmapDataService beatmapDataService)
+        public ReplayMapModel(ReplayDbContext replayDbContext, BeatmapDbContext beatmapDbContext)
         {
-            this.service = service;
-            this.beatmapDataService = beatmapDataService;
+            this.replayDbContext = replayDbContext;
+            this.beatmapDbContext = beatmapDbContext;
         }
 
         public async Task<IActionResult> OnGetAsync()
@@ -53,32 +53,25 @@ namespace vault.Pages.Replays
             {
                 return Redirect("/Maps/MostPlayed");
             }
-            
-            TotalCount = await service.Collection.EstimatedDocumentCountAsync();
 
-            var sortDefinition = Order switch
+            TotalCount = await replayDbContext.Replays.CountAsync();
+
+            var collection = replayDbContext.Replays.Where(r => r.BeatmapHash == Hash);
+            
+            var sortedCollection = Order switch
             {
-                SortBy.Timestamp or SortBy.Time => Builders<Replay>.Sort.Descending(replay => replay.Timestamp),
-                SortBy.Combo => Builders<Replay>.Sort.Descending(replay => replay.MaxCombo),
-                SortBy.Miss => Builders<Replay>.Sort.Ascending(replay => replay.CountMiss),
-                SortBy.Accuracy => Builders<Replay>.Sort.Combine(
-                    Builders<Replay>.Sort.Descending(replay => replay.Count300),
-                    Builders<Replay>.Sort.Descending(replay => replay.Count100),
-                    Builders<Replay>.Sort.Descending(replay => replay.Count50)
-                ),
-                _ => Builders<Replay>.Sort.Descending(replay => replay.Score)
+                SortBy.Timestamp or SortBy.Time => collection.OrderByDescending(replay => replay.Timestamp),
+                SortBy.Combo => collection.OrderByDescending(replay => replay.MaxCombo),
+                SortBy.Miss => collection.OrderByDescending(replay => replay.CountMiss),
+                SortBy.Accuracy => collection
+                    .OrderByDescending(replay => replay.Count300)
+                    .ThenByDescending(replay => replay.Count100)
+                    .ThenByDescending(replay => replay.Count50),
+                _ => collection.OrderByDescending(replay => replay.Score)
             };
-                
-            var cursor = await service.Collection.FindAsync(
-                Builders<Replay>.Filter.Eq("beatmap_hash", Hash),
-                new FindOptions<Replay>
-                {
-                    Sort = sortDefinition
-                }
-            );
-            var listing = (await cursor.ToListAsync())!;
-            Replays = listing.ToArray();
-            var groupedReplays = listing
+            
+            Replays = sortedCollection.ToArray();
+            var groupedReplays = Replays
                 .GroupBy(replay => replay.Mode)
                 .OrderBy(group => group.Key)
                 .ToDictionary(
@@ -89,7 +82,7 @@ namespace vault.Pages.Replays
             SortedReplays = new SortedDictionary<int, Replay[]>(groupedReplays);
                 
             if (Replays.Length != 0)
-                Map = await beatmapDataService.GetByHash(Replays[0].BeatmapHash);
+                Map = await beatmapDbContext.GetByHash(Replays[0].BeatmapHash);
 
             foreach (var replay in Replays)
             {

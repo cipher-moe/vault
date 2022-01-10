@@ -2,29 +2,29 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using BitFaster.Caching.Lru;
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
 using OsuSharp;
 
-namespace vault.Services
+namespace vault.Databases
 {
-    public class BeatmapDataService
+    public class BeatmapDbContext : DbContext
     {
+        private readonly OsuClient osuClient;
+        private readonly HttpClient httpClient;
         private readonly FastConcurrentLru<string, Beatmap> cache = new(500);
         private readonly FastConcurrentLru<string, string> idToHashCache = new(500);
-        private readonly OsuClient client;
-        private readonly IMongoCollection<BeatmapData.Beatmap> collection;
-        private readonly HttpClient httpClient;
 
-        public BeatmapDataService(OsuClient client, MongoClient mongoClient, HttpClient httpClient)
+        public BeatmapDbContext(DbContextOptions<BeatmapDbContext> options, OsuClient osuClient, HttpClient httpClient) : base(options)
         {
-            this.client = client;
+            this.osuClient = osuClient;
             this.httpClient = httpClient;
-            collection = mongoClient.GetDatabase("osu").GetCollection<BeatmapData.Beatmap>("beatmap");
         }
+        public DbSet<Entities.Beatmap> Beatmaps { get; set; }
 
-        public async Task<long> CountBeatmap()
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            return await collection.EstimatedDocumentCountAsync();
+            modelBuilder.Entity<Entities.Beatmap>().ToTable("beatmaps").HasKey(r => r.BeatmapHash);
+            base.OnModelCreating(modelBuilder);
         }
         
         public async Task<string?> GetBeatmapHash(string id)
@@ -48,9 +48,9 @@ namespace vault.Services
         public async Task<Beatmap?> GetByHash(string hash)
         {
             if (cache.TryGet(hash, out var @return)) return @return;
-            var res = await client.GetBeatmapByHashAsync(hash);
+            var res = await osuClient.GetBeatmapByHashAsync(hash);
             cache.AddOrUpdate(hash, res);
             return res;
-        }
+        } 
     }
 }

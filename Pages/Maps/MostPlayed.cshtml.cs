@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using BAMCIS.ChunkExtensionMethod;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
 using OsuSharp;
+using vault.Databases;
 using vault.Services;
-using Replay = vault.Services.ReplayDatabase.Replay;
 
 namespace vault.Pages.Maps
 {
@@ -23,20 +23,21 @@ namespace vault.Pages.Maps
         public bool InvalidBeatmap;
         public long TotalCount;
 
-        private readonly BeatmapDataService beatmapDataService;
-        private readonly ReplayDatabaseService replayDatabaseService;
+        private readonly ReplayDbContext replayDbContext;
+        private readonly BeatmapDbContext beatmapDbContext;
+        private readonly MostPlayedMapsService mostPlayedMapsService;
         
-        public MostPlayedMapsModel(ReplayDatabaseService replayDatabaseService, BeatmapDataService beatmapDataService)
+        public MostPlayedMapsModel(ReplayDbContext replayDbContext, BeatmapDbContext beatmapDbContext, MostPlayedMapsService mostPlayedMapsService)
         {
-            this.beatmapDataService = beatmapDataService;
-            this.replayDatabaseService = replayDatabaseService;
-            MostPlayedMaps = (replayDatabaseService.MostPlayedMaps, replayDatabaseService.LastUpdated);
+            this.replayDbContext = replayDbContext;
+            this.beatmapDbContext = beatmapDbContext;
+            this.mostPlayedMapsService = mostPlayedMapsService;
         }
 
         private async Task EnsureDataAvailable()
         {
-            MostPlayedMaps = (replayDatabaseService.MostPlayedMaps, replayDatabaseService.LastUpdated);
-            TotalCount = await beatmapDataService.CountBeatmap();
+            MostPlayedMaps = (mostPlayedMapsService.MostPlayedMaps, mostPlayedMapsService.LastUpdated);
+            TotalCount = await beatmapDbContext.Beatmaps.CountAsync();
             var hashChunks = MostPlayedMaps.Item1
                 .Select(pair => pair.Item1)
                 .Chunk(6);
@@ -47,7 +48,7 @@ namespace vault.Pages.Maps
                     chunk
                         .Select(async hash =>
                         {
-                            var beatmap = await beatmapDataService.GetByHash(hash);
+                            var beatmap = await beatmapDbContext.GetByHash(hash);
                             return (hash, beatmap);
                         }));
 
@@ -68,11 +69,7 @@ namespace vault.Pages.Maps
             Beatmap = Beatmap?.ToLowerInvariant();
             if (Beatmap != null)
             {
-                var replayCount = await replayDatabaseService.Collection
-                    .CountDocumentsAsync(
-                        Builders<Replay>.Filter.Eq("beatmap_hash", Beatmap),
-                        new CountOptions { Limit = 1 }
-                    );
+                var replayCount = await replayDbContext.Replays.Where(r => r.BeatmapHash == Beatmap).CountAsync();
 
                 if (replayCount == 0)
                 {
