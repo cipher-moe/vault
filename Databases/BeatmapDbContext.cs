@@ -11,7 +11,7 @@ namespace vault.Databases
     {
         private readonly OsuClient osuClient;
         private readonly HttpClient httpClient;
-        private static readonly FastConcurrentLru<string, Beatmap> Cache = new(500);
+        private static readonly FastConcurrentLru<string, Beatmap> Cache = new(200);
         private static readonly FastConcurrentLru<string, string> IDToHashCache = new(500);
 
         public BeatmapDbContext(DbContextOptions<BeatmapDbContext> options, OsuClient osuClient, HttpClient httpClient) : base(options)
