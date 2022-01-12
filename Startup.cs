@@ -83,7 +83,7 @@ namespace vault
             }
 
             app.UseSession();
-            app.UseHttpsRedirection();
+            if (env.IsDevelopment()) app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();
