@@ -41,11 +41,6 @@ namespace vault
                 var connectionString = Environment.GetEnvironmentVariable("MARIADB_CONNECTION_STRING")!;
                 builder
                     .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
-                    .UseLoggerFactory(
-                        LoggerFactory.Create(
-                            b => b
-                                .AddConsole()
-                                .AddFilter(level => level >= LogLevel.Information)))
                     .EnableSensitiveDataLogging()
                     .EnableDetailedErrors();
             });
@@ -55,11 +50,6 @@ namespace vault
                 var connectionString = Environment.GetEnvironmentVariable("MARIADB_CONNECTION_STRING")!;
                 builder
                     .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
-                    .UseLoggerFactory(
-                        LoggerFactory.Create(
-                            b => b
-                                .AddConsole()
-                                .AddFilter(level => level >= LogLevel.Information)))
                     .EnableSensitiveDataLogging()
                     .EnableDetailedErrors();
             });
