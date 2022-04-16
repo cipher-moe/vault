@@ -1,9 +1,9 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:5.0.7-alpine3.13-amd64 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:6.0.4-alpine3.15 AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/sdk:5.0.301-alpine3.13-amd64 AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0.202-alpine3.15 AS build
 WORKDIR /src
 COPY ["vault.csproj", "./"]
 RUN dotnet restore "vault.csproj"
