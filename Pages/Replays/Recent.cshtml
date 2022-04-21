@@ -45,7 +45,7 @@
 </div>
 
 <div class="xl:container mx-auto flex justify-center items-center w-full">
-    <table class="table-fixed w-full border-collapse">
+    <table class="table-fixed w-full border-collapse hidden md:table">
         @{
             const string
                 cellShowInLargePage = "hidden xl:table-cell",
@@ -72,6 +72,8 @@
         <tbody>
         @foreach (var replay in Model.Replays)
         {
+            var beatmap = Model.Maps.TryGetValue(replay.BeatmapHash, out var map) ? map : null;
+
             <tr class="@(replay.PerfectCombo ? "bg-green-100" : "") border-gray-300 text-center">
                 <td class="border border-gray-300 w-7 xl:w-14">
                     <img class="h-7 mx-auto hidden xl:inline"
@@ -106,7 +108,6 @@
                     <b>@replay.Count300</b> / <b>@replay.Count100</b> / <b>@replay.Count50</b> / <b>@replay.CountMiss</b>
                 </td>
                 @{
-                    var beatmap = Model.Maps.TryGetValue(replay.BeatmapHash, out var map) ? map : null;
                     <td class="border border-gray-300 p-2 w-1/4 @(beatmap == null ? "bg-yellow-200" : "")">
                         <a href="/replays/map/@replay.BeatmapHash"
                            class="underline text-black hover:text-blue-800 visited:text-purple-600">

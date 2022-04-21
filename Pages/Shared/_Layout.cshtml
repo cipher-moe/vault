@@ -20,7 +20,7 @@
 <body>
     <header>
         <nav class="bg-gray-800">
-            <div class="xl:container max-w-7xl mx-auto">
+            <div class="container mx-4 xl:mx-auto">
                 <div class="flex items-center justify-between h-16">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
@@ -30,7 +30,7 @@
                                 </a>
                             </div>
                         </div>
-                        <div class="hidden md:block">
+                        <div class="hidden xl:block">
                             @{
                                 string chosenStyles = "bg-gray-900 text-white px-3 py-2 rounded-md text-sm font-medium";
                                 string otherStyles = "text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium";
@@ -62,7 +62,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="flex items-center justify-self-end">
+                    <div class="flex items-center justify-self-end hidden xl:block">
                         <span class="text-white">
                             Generated : @DateTime.Now.ToUniversalTime().ToString($"HH:mm:ss, dd/MM/yyyy UTC", CultureInfo.InvariantCulture)
                         </span>
@@ -71,7 +71,7 @@
             </div>
         </nav>
     </header>
-    <div class="xl:container mx-auto">
+    <div class="xl:container mx-4 xl:mx-auto">
         <main role="main" class="pb-3">
             <br />
             @RenderBody()

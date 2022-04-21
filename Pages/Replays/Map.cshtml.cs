@@ -1,15 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Legacy;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
-using OsuSharp;
 using vault.Databases;
+using Beatmap = OsuSharp.Beatmap;
 using Replay = vault.Entities.Replay;
 
 namespace vault.Pages.Replays
@@ -18,7 +20,9 @@ namespace vault.Pages.Replays
     {
         private readonly ReplayDbContext replayDbContext;
         private readonly BeatmapDbContext beatmapDbContext;
+        private readonly HttpClient httpClient;
         public Beatmap? Map;
+        public WorkingBeatmap? WorkingBeatmap; 
         public long TotalCount;
         public string Hash { get; set; } = "";
         public SortedDictionary<int, Replay[]> SortedReplays = new();
@@ -39,10 +43,11 @@ namespace vault.Pages.Replays
         public SortBy? Order { get; set; }
 
 
-        public ReplayMapModel(ReplayDbContext replayDbContext, BeatmapDbContext beatmapDbContext)
+        public ReplayMapModel(ReplayDbContext replayDbContext, BeatmapDbContext beatmapDbContext, HttpClient httpClient)
         {
             this.replayDbContext = replayDbContext;
             this.beatmapDbContext = beatmapDbContext;
+            this.httpClient = httpClient;
         }
 
         public async Task<IActionResult> OnGetAsync()
@@ -80,16 +85,19 @@ namespace vault.Pages.Replays
                 );
 
             SortedReplays = new SortedDictionary<int, Replay[]>(groupedReplays);
-                
+
             if (Replays.Length != 0)
+            {
                 Map = await beatmapDbContext.GetByHash(Replays[0].BeatmapHash);
+                var mapfile = await httpClient.GetByteArrayAsync($"https://osu.ppy.sh/osu/{Map!.BeatmapId}");
+                WorkingBeatmap = Pepper.Commons.Osu.WorkingBeatmap.Decode(mapfile, (int?) Map?.BeatmapId);
+            }
 
             foreach (var replay in Replays)
             {
                 var score = new ScoreInfo
                 {
-                    Ruleset = ReplayRecentModel.Rulesets[replay.Mode].RulesetInfo,
-                    RulesetID = replay.Mode,
+                    Ruleset = ReplayRecentModel.Rulesets[replay.Mode].RulesetInfo
                 };
                 score.SetCount50(replay.Count50);
                 score.SetCount100(replay.Count100);

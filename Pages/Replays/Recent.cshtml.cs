@@ -24,7 +24,7 @@ namespace vault.Pages.Replays
     {
         protected override WorkingBeatmap GetBeatmap(string md5Hash) => null;
         protected override Ruleset GetRuleset(int rulesetId) => ReplayRecentModel.Rulesets[rulesetId];
-        public new void CalculateAccuracy(ScoreInfo score) => base.CalculateAccuracy(score);
+        public void CalculateAccuracy(ScoreInfo score) => PopulateAccuracy(score);
     }
     
     public class ReplayRecentModel : PageModel
@@ -91,8 +91,7 @@ namespace vault.Pages.Replays
             {
                 var score = new ScoreInfo
                 {
-                    Ruleset = Rulesets[replay.Mode].RulesetInfo,
-                    RulesetID = replay.Mode,
+                    Ruleset = Rulesets[replay.Mode].RulesetInfo
                 };
                 score.SetCount50(replay.Count50);
                 score.SetCount100(replay.Count100);

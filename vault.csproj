@@ -6,15 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BitFaster.Caching" Version="1.0.4" />
     <PackageReference Include="dotenv.net" Version="3.0.0" />
-    <PackageReference Include="OsuSharp" Version="5.4.4" />
+    <PackageReference Include="Pepper.Commons.Osu" Version="1.0.0-20220420-1432" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="5.0.3" />
-    <PackageReference Include="ppy.osu.Game" Version="2021.612.0" />
-    <PackageReference Include="ppy.osu.Game.Rulesets.Catch" Version="2021.612.0" />
-    <PackageReference Include="ppy.osu.Game.Rulesets.Mania" Version="2021.612.0" />
-    <PackageReference Include="ppy.osu.Game.Rulesets.Osu" Version="2021.612.0" />
-    <PackageReference Include="ppy.osu.Game.Rulesets.Taiko" Version="2021.612.0" />
   </ItemGroup>
 
   <ItemGroup>
