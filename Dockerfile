@@ -6,6 +6,7 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:6.0.202-alpine3.15 AS build
 WORKDIR /src
 COPY ["vault.csproj", "./"]
+COPY ["nuget.config", "./"]
 RUN dotnet restore "vault.csproj"
 COPY . .
 WORKDIR "/src/"
