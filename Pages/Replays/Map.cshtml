@@ -217,7 +217,10 @@ else
                                 <div class="text-right">
                                     <b>@replay.PlayerName</b>
                                     <br/>
-                                    @replay.Timestamp.ToUniversalTime().ToString($"HH:mm:ss, dd/MM/yyyy", CultureInfo.InvariantCulture)
+                                    <a class="underline" href="https://poetry-rewind.cipher.moe/@replay.BeatmapHash/@replay.Sha256">
+                                        @replay.Timestamp.ToUniversalTime().ToString($"HH:mm:ss, dd/MM/yyyy", CultureInfo.InvariantCulture)
+                                        <i class="fa fa-download" aria-hidden="true"></i>
+                                    </a>
                                 </div>
                             </div>
                         </td>
