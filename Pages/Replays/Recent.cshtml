@@ -45,13 +45,13 @@
 </div>
 
 <div class="xl:container mx-auto flex justify-center items-center w-full">
-    <table class="table-fixed w-full border-collapse hidden md:table">
+    <table class="table-fixed w-full table [border-spacing:0_theme('spacing.2')]">
         @{
             const string
                 cellShowInLargePage = "hidden xl:table-cell",
                 cellHideInLargePage = "xl:hidden";
         }
-        <thead>
+        <thead class="hidden md:table-header-group">
         <tr>
             <th class="border border-green-900 w-1/12 xl:w-14">Mode</th>
             <th class="border border-green-900 w-1/12 xl:w-1/6">Timestamp (in UTC)</th>
@@ -74,7 +74,60 @@
         {
             var beatmap = Model.Maps.TryGetValue(replay.BeatmapHash, out var map) ? map : null;
 
-            <tr class="@(replay.PerfectCombo ? "bg-green-100" : "") border-gray-300 text-center">
+            <tr class="md:hidden">
+                <td class="text-white p-2 rounded-xl"
+                    style="background-image:
+                        linear-gradient(rgb(0,0,0,0.25), rgb(255,255,255,0.4)),
+                        linear-gradient(rgb(0,0,0,0.3), rgb(0,0,0,0.3)), 
+                        url('https://assets.ppy.sh/beatmaps/@(beatmap?.BeatmapsetId)/covers/cover@2x.jpg')">
+                    <div class="flex justify-between">
+                        <div class="text-xl">
+                            <a href="/replays/map/@replay.BeatmapHash">
+                                @if (beatmap != null)
+                                {
+                                    <span class="underline">
+                                        @beatmap.Title <b>[@beatmap.Difficulty]</b>
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="underline">@replay.BeatmapHash</span>
+                                }
+                            </a>
+                        </div>
+                        <div class="flex flex-row items-center gap-1">
+                            <div class="flex flex-row items-center">
+                                <span>@ReplayRecentModel.Rulesets[replay.Mode].RulesetInfo.Name</span>
+                            </div>
+                            <div class="flex flex-row items-center">
+                                <img class="h-4 mx-auto inline svg-filter-white"
+                                     src="@Icons.GetIconPath(replay.Mode)" alt="@ReplayRecentModel.Rulesets[replay.Mode].RulesetInfo.Name"/>
+                            </div>
+                        </div>
+                    </div>
+                    <br/>
+                    <br/>
+                    <div class="flex flex-row justify-between items-end">
+                        <div>
+                            <span class="text-xl">
+                                <b>@replay.MaxCombo</b>x <b class="text-sm">(@replay.Score.ToString("n0", CultureInfo.InvariantCulture))</b>
+                            </span>
+                            <br/>
+                            <b class="text-xl">@replay.Accuracy</b>%
+                            <span class="text-sm">
+                                (<b>@replay.Count300</b> / <b>@replay.Count100</b> / <b>@replay.Count50</b> / <b>@replay.CountMiss</b>)
+                            </span>
+                        </div>
+                        <div class="text-right">
+                            <b>@replay.PlayerName</b>
+                            <br/>
+                            @replay.Timestamp.ToUniversalTime().ToString($"HH:mm:ss, dd/MM/yyyy", CultureInfo.InvariantCulture)
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <tr class="@(replay.PerfectCombo ? "bg-green-100" : "") hidden md:table-row border-gray-300 text-center">
                 <td class="border border-gray-300 w-7 xl:w-14">
                     <img class="h-7 mx-auto hidden xl:inline"
                          src="@Icons.GetIconPath(replay.Mode)" alt="@ReplayRecentModel.Rulesets[replay.Mode].RulesetInfo.Name"/>
@@ -95,7 +148,7 @@
                 <td class="border border-gray-300 p-2 @cellShowInLargePage">@replay.Accuracy%</td>
                 <td class="border border-gray-300 p-0 w-1/12 @cellHideInLargePage">
                     <b>@replay.MaxCombo</b>x
-                    <br />
+                    <br/>
                     <b>@replay.Accuracy</b>%
                 </td>
                 <td class="border border-gray-300 p-0 w-1/12 @cellShowInLargePage">@replay.Count300</td>
@@ -136,7 +189,7 @@
                         <span class="underline" title="@replay.Sha256.ToLowerInvariant()">
                             @replay.Sha256[..7].ToLowerInvariant()
                         </span>
-                        <br class="inline xl:hidden" />
+                        <br class="inline xl:hidden"/>
                         <i class="fa fa-download" aria-hidden="true"></i>
                     </a>
                 </td>
