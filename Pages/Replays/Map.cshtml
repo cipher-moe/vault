@@ -71,16 +71,60 @@ else
         @ViewData["Title"]
     </div>
 }
+
+@{
+    var sortMode = Model.Order;
+    bool isTime = sortMode == ReplayMapModel.SortBy.Timestamp,
+        isScore = sortMode == ReplayMapModel.SortBy.Score,
+        isCombo = sortMode == ReplayMapModel.SortBy.Combo,
+        isAccuracy = sortMode == ReplayMapModel.SortBy.Accuracy,
+        isMiss = sortMode == ReplayMapModel.SortBy.Miss;
+}
 <br/>
 <div class="text-xs">
-    Rows wrapped in <span class="text-purple-400 underline"><b>purple</b></span> borders are top scores for the respective mod combination.
+    Rows wrapped in
+    <span class="text-purple-400 underline">
+        <b>purple</b>
+    </span> borders are top scores for the respective mod combination.
     <br/>
     @if (Model.Replays.Any(replay => replay.PerfectCombo))
     {
-        <span>Rows fully in <b>bold</b> text indicate full-combo replays.</span>
-        <br />
+        <span class="inline md:hidden">Rows with <b class="bg-green-200">green</b> background indicate full-combo replays.</span>
+        <span class="hidden md:inline">Rows fully in <b>bold</b> text indicate full-combo replays.</span>
+        <br/>
     }
-    Click column headers in <span class="@clickableColumnHeaderTextStyle"><b>blue</b></span> to sort by the respective category. 
+    <div class="hidden md:block">
+        Click column headers in <span class="@clickableColumnHeaderTextStyle"><b>blue</b></span> to sort by the respective category.
+    </div>
+
+    <div class="block md:hidden flex flex-row gap-2 justify-between">
+        Sort by :
+        <a
+            href="?sort=timestamp"
+            class="@clickableColumnHeaderTextStyle @(isTime ? chosenColumnHeaderTextStyle : "")">
+            Timestamp (in UTC)
+        </a>
+        <a
+            href="?sort=score"
+            class="@clickableColumnHeaderTextStyle @(isScore ? chosenColumnHeaderTextStyle : "")">
+            Score
+        </a>
+        <a
+            href="?sort=combo"
+            class="@clickableColumnHeaderTextStyle @(isCombo ? chosenColumnHeaderTextStyle : "")">
+            Max combo
+        </a>
+        <a
+            href="?sort=accuracy"
+            class="@clickableColumnHeaderTextStyle @(isAccuracy ? chosenColumnHeaderTextStyle : "")">
+            Accuracy
+        </a>
+        <a
+            href="?sort=miss"
+            class="@clickableColumnHeaderTextStyle @(isMiss ? chosenColumnHeaderTextStyle : "")">
+            Misses
+        </a>
+    </div>
 </div>
 <br/>
 <div class="xl:container mx-auto flex justify-center items-center w-full">
@@ -89,20 +133,12 @@ else
         const string
             cellShowInLargePage = "hidden xl:table-cell",
             cellHideInLargePage = "xl:hidden";
-        <table class="table-fixed w-full border-collapse">
-            <thead>
+        <table class="table-fixed w-full border-separate md:border-collapse">
+            <thead class="hidden md:table-header-group">
             <tr>
-                @{
-                    var sortMode = Model.Order;
-                    bool isTime = sortMode == ReplayMapModel.SortBy.Timestamp,
-                        isScore = sortMode == ReplayMapModel.SortBy.Score,
-                        isCombo = sortMode == ReplayMapModel.SortBy.Combo,
-                        isAccuracy = sortMode == ReplayMapModel.SortBy.Accuracy,
-                        isMiss = sortMode == ReplayMapModel.SortBy.Miss;
-                }
                 <th class="border border-green-900 w-14">Mode</th>
                 <th class="border border-green-900 w-1/6 @(isTime ? chosenColumnHeaderCellStyle : "")">
-                    <a 
+                    <a
                         href="?sort=timestamp"
                         class="@clickableColumnHeaderTextStyle @(isTime ? chosenColumnHeaderTextStyle : "")">
                         Timestamp (in UTC)
@@ -136,7 +172,7 @@ else
                 <th class="border border-green-900 w-1/12 @cellShowInLargePage">50s</th>
                 <th class="border border-green-900 w-1/12 @cellHideInLargePage">Hit counts</th>
                 <th class="border border-green-900 w-1/12 @(isMiss ? chosenColumnHeaderCellStyle : "")">
-                    <a 
+                    <a
                         href="?sort=miss"
                         class="@clickableColumnHeaderTextStyle @(isMiss ? chosenColumnHeaderTextStyle : "")">
                         Misses
@@ -153,7 +189,7 @@ else
                 var maxCombo = replays.Max(rep => rep.MaxCombo);
                 var maxAccuracy = replays.Max(rep => double.Parse(rep.Accuracy)).ToString("0.###");
                 var minMiss = replays.Min(rep => rep.CountMiss);
-                
+
                 @foreach (var replay in replays)
                 {
                     var failed =
@@ -161,7 +197,33 @@ else
                         && replay.CountMiss + replay.Count50 + replay.Count100 + replay.Count300 != Model.WorkingBeatmap!.Beatmap.HitObjects.Count;
                     var isTopScore = Model.TopModScores[(LegacyMods)replay.Mods] == replay.Score;
 
-                    <tr class="@(replay.PerfectCombo ? "font-bold" : "") @(isTopScore ? "border-purple-400 border-2" : "border-gray-300") text-center @(failed ? "line-through" : "")">
+                    <tr class="md:hidden @(failed ? "line-through" : "")">
+                        <td class="p-2 rounded-xl @(replay.PerfectCombo ? "bg-green-200" : "") @(isTopScore ? "border-purple-400 border-2" : "")">
+                            <div class="flex flex-row justify-between items-end">
+                                <div>
+                                    <span class="text-xl">
+                                        <b>@replay.MaxCombo</b>x
+                                        <span class="text-sm">
+                                            (@replay.Score.ToString("n0", CultureInfo.InvariantCulture))
+                                            <b>[</b>@ReplayRecentModel.Rulesets[replay.Mode].RulesetInfo.Name<b>]</b>
+                                        </span>
+                                    </span>
+                                    <br/>
+                                    <b class="text-xl">@replay.Accuracy</b>%
+                                    <span class="text-sm">
+                                        (<b>@replay.Count300</b> / <b>@replay.Count100</b> / <b>@replay.Count50</b> / <b>@replay.CountMiss</b>)
+                                    </span>
+                                </div>
+                                <div class="text-right">
+                                    <b>@replay.PlayerName</b>
+                                    <br/>
+                                    @replay.Timestamp.ToUniversalTime().ToString($"HH:mm:ss, dd/MM/yyyy", CultureInfo.InvariantCulture)
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr class="hidden md:table-row @(replay.PerfectCombo ? "font-bold" : "") @(isTopScore ? "border-purple-400 border-2" : "border-gray-300") text-center @(failed ? "line-through" : "")">
                         <td class="border border-gray-300">
                             <img class="h-7 mx-auto" src="@Icons.GetIconPath(replay.Mode)" alt="@ReplayRecentModel.Rulesets[replay.Mode].RulesetInfo.Name"/>
                         </td>
