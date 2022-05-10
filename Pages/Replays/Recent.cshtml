@@ -45,7 +45,7 @@
 </div>
 
 <div class="xl:container mx-auto flex justify-center items-center w-full">
-    <table class="table-fixed w-full table [border-spacing:0_theme('spacing.2')] md:[border-spacing:unset] md:border-collapse">
+    <table class="table-fixed w-full table [border-spacing:0_theme('spacing.2')] border-separate md:[border-spacing:unset] md:border-collapse">
         @{
             const string
                 cellShowInLargePage = "hidden xl:table-cell",
@@ -81,7 +81,7 @@
                         linear-gradient(rgb(0,0,0,0.3), rgb(0,0,0,0.3)), 
                         url('https://assets.ppy.sh/beatmaps/@(beatmap?.BeatmapsetId)/covers/cover@2x.jpg')">
                     <div class="flex justify-between">
-                        <div class="text-xl">
+                        <div class="text-lg">
                             <a href="/replays/map/@replay.BeatmapHash">
                                 @if (beatmap != null)
                                 {
@@ -105,7 +105,6 @@
                             </div>
                         </div>
                     </div>
-                    <br/>
                     <br/>
                     <div class="flex flex-row justify-between items-end">
                         <div>
