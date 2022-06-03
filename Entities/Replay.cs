@@ -9,7 +9,7 @@ namespace vault.Entities
         [Column("version")] public int Version { get; set; }
         [Column("beatmap_hash")] public string BeatmapHash { get; set; } = "";
         [Column("player_name")] public string PlayerName { get; set; } = "";
-        [Column("replay_hash")] public string ReplayHash { get; set; } = "";
+        [Column("replay_hash")] public string? ReplayHash { get; set; } = "";
         [Column("count_300")] public int Count300 { get; set; }
         [Column("count_100")] public int Count100 { get; set; }
         [Column("count_50")] public int Count50 { get; set; }
